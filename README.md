@@ -1,2 +1,2 @@
 # NLFEM
-Nonlocal implementation of 2d FEM
+Nonlocal implementation of 2D FEM
