@@ -54,7 +54,7 @@ class Delaunay1V(Geometria):
                 a.append(i)
         return np.array(a)
     def generarCB(this,bordes,valor=0):
-        cb = []
+        cb = this.cbe
         this.bordesCBE = bordes
         this.valorCBE= valor
         for segmento in bordes:
@@ -63,6 +63,7 @@ class Delaunay1V(Geometria):
             cbe[:,0] = nodos
             cbe[:,1] = valor
             cb+= cbe.tolist()
+        #this.cbe=cb
         return cb
     def generarDatos(this):
         m = []

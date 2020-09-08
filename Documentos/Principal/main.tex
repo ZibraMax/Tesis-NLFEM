@@ -1,0 +1,127 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{ragged2e}
+\usepackage{float}
+\usepackage{vmargin}
+\usepackage{wrapfig}
+\usepackage{titlesec}
+\usepackage{lastpage}
+
+\usepackage{lipsum}
+
+\usepackage[spanish]{babel}
+\decimalpoint
+
+\usepackage[utf8]{inputenc}
+\usepackage{pgfplots}
+\DeclareUnicodeCharacter{2212}{−}
+\usepgfplotslibrary{groupplots,dateplot}
+\usetikzlibrary{patterns,shapes.arrows}
+\pgfplotsset{compat=newest}
+
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\titleformat{\section}
+{\sffamily}{\bfseries}{0pt}{\LARGE}
+
+\titleformat{\subsection}
+{\sffamily}{\bfseries}{0pt}{\Large}
+
+\DeclareCaptionFont{captionFont}{\sffamily}
+
+\captionsetup{
+    width=0.9\linewidth, % width of caption is 90% of current textwidth
+    labelfont=bf,        % the label, e.g. figure 12, is bold
+    font=small,          % the whole caption text (label + content) is small
+    labelsep=period,
+    font=captionFont,
+}
+
+\setpapersize{A4}
+\setmargins{3cm}        % Margen izquierda
+{1cm}                   % Margen superior
+{15cm}                  % Margen derecha
+{22.42cm}               % Margen inferior
+{10pt}
+{1cm}
+{0pt}
+{1cm}
+\usepackage{xcolor}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+
+
+\newcommand\course{\sffamily Nombre Proyecto}
+\newcommand\NetIDb{\sffamily \today}
+\newcommand\NetIDc{\sffamily Arturo Rodriguez: 201718348}
+\floatplacement{figure}{H}
+\floatplacement{table}{H}
+
+\lhead{\NetIDc}
+\rhead{\sffamily da.rodriguezh@uniandes.edu.co\\\course}
+\lhead{\begin{picture}
+	(-1,-1) \put(-7,6){\includegraphics[width=3cm]{path5.png} }
+	\end{picture}\NetIDc\\\NetIDb}
+	
+
+\lfoot{\sffamily Proyecto de Grado}
+\cfoot{}
+\rfoot{\sffamily Página \textbf{\thepage\ }de \textbf{\pageref{LastPage}}}
+\headsep 1.5em
+
+\renewcommand{\footrulewidth}{0.4pt}
+
+\addto\captionsspanish{\renewcommand{\tablename}{Tabla}}
+
+\newcommand\blfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
+
+
+\begin{document}
+\sffamily
+\setlength{\headheight}{80pt}
+
+\title{Nombre Tesis}
+\author{}
+\maketitle
+\thispagestyle{fancy}
+\tableofcontents
+\newpage
+\setpapersize{A4}
+\setmargins{3cm}        % Margen izquierda
+{1cm}                   % Margen superior
+{15cm}                  % Margen derecha
+{22.42cm}               % Margen inferior
+{10pt}
+{1cm}
+{0pt}
+{1cm}
+
+\lhead{\NetIDc}
+\rhead{\sffamily da.rodriguezh@uniandes.edu.co}
+
+\lfoot{\sffamily Proyecto de Grado}
+\cfoot{}
+\rfoot{\sffamily Página \textbf{\thepage\ }de \textbf{\pageref{LastPage}}}
+\headheight 20pt
+\footskip 40pt
+\textheight 680pt
+\renewcommand{\footrulewidth}{0.4pt}
+
+\pagestyle{fancy}
+\newpage
+\lipsum
+\lipsum
+\lipsum
+\lipsum
+\lipsum
+\lipsum
+\end{document}
