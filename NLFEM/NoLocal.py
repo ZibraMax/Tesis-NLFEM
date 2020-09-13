@@ -21,7 +21,7 @@ class NoLocal(FEM):
     def generarElementos(this, gauss=4):
         for d, t in zip(this.geometria.diccionarios, this.geometria.tipos):
             coords = np.array(this.geometria.gdls)[np.ix_(d)]
-            if t == 'T1V':
+            if t == 'T1V' or t == 'T2V':
                 if len(d) == 3:
                     k = np.array(d)
                     k1 = k * 2

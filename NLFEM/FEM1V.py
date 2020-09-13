@@ -17,11 +17,13 @@ class FEM1V(FEM):
     def __init__(this,geometria):
         super().__init__(len(geometria.gdls))
         this.importarGeometria(geometria)
+        this.cbe = geometria.cbe
+        this.cbn = geometria.cbn
         
     def generarElementos(this,gauss=4):
         for d,t in zip(this.geometria.diccionarios,this.geometria.tipos):
             coords = np.array(this.geometria.gdls)[np.ix_(d)]
-            if t == 'T1V':
+            if t == 'T1V' or t == 'T2V':
                 if len(d) == 3:
                     this.elementos.append(TriangularL(coords,np.array(d),gauss=gauss))
                 elif len(d) == 6:
@@ -60,7 +62,7 @@ class FEM1V(FEM):
                 EF = lambda z,n: f(x(z,n),y(z,n))*psi(z,n,i)*np.linalg.det(J(z,n))
                 F[i] = e.intGauss2D(gauss,EF)
             e.determinarMatrices(K,F,Q)
-    def graficarSolucion(this,figsize=[12,7],cmap='magma',linewidth=2,markersize=2,mask=None):
+    def graficarSolucion(this,figsize=[17,10],cmap='magma',linewidth=2,markersize=2,mask=None):
         xtotal = []
         ytotal = []
         ztotal = []
@@ -89,7 +91,7 @@ class FEM1V(FEM):
         ax.set_title('Solucion de elementos finitos')
         
         ax = fig.add_subplot(gs[0, 1])
-        
+
         count = 0
         for e in this.elementos:
             progressbar(count,len(this.elementos), prefix="Graficando contornos ", size=50)
@@ -113,6 +115,7 @@ class FEM1V(FEM):
         cbar = fig.colorbar(surf)
         ax.set_xlabel('x')
         ax.set_ylabel('y')
+        ax.axes.set_aspect('equal')
         ax.set_title('Solucion de elementos finitos')
         
         ax = fig.add_subplot(gs[1, 0])
@@ -134,6 +137,7 @@ class FEM1V(FEM):
         cbar = fig.colorbar(surf)
         ax.set_xlabel('x')
         ax.set_ylabel('y')
+        ax.axes.set_aspect('equal')
         ax.set_title(r'$\frac{\partial U}{\partial X}$')
         if not mask== None:
             cornersnt = np.array(mask[::-1])
@@ -167,6 +171,7 @@ class FEM1V(FEM):
         cbar = fig.colorbar(surf)
         ax.set_xlabel('x')
         ax.set_ylabel('y')
+        ax.axes.set_aspect('equal')
         ax.set_title(r'$\frac{\partial U}{\partial X}$')
         if not mask== None:
             cornersnt = np.array(mask[::-1])

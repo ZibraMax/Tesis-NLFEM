@@ -1,5 +1,4 @@
 from .integradorRectangular import *
-
 class CuadrilateroL(integradorRectangular):
     def __init__(this,coords,gdl=None,gauss=4):
         if len(coords) == 4:
