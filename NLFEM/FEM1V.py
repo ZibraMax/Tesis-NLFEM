@@ -55,7 +55,7 @@ class FEM1V(FEM):
             psi = lambda z,n,k: e.psi[k](z,n)
             for i in range(n):
                 for j in range(n):
-                    def FUNCION(z,n):
+                    def EK(z,n):
                         X = x(z,n)
                         Y = y(z,n)
                         jacobiano = _J(z,n)
