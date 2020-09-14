@@ -41,8 +41,8 @@ class FEM1V(FEM):
             count += 1
             progressbar(count,len(this.elementos), prefix="Integrando elementos ", size=50)
             psis = e.psis
-            dzpsis = e.dzpsis
-            dnpsis = e.dnpsis
+            dzpsi = e.dzpsi
+            dnpsi = e.dnpsi
             gauss = e.gauss
             _J = e._J
             J = e.J
@@ -52,12 +52,19 @@ class FEM1V(FEM):
             K = np.zeros([n,n])
             Q = np.zeros([n,1])
             F = np.zeros([n,1])
+            psi = lambda z,n,k: e.psi[k](z,n)
             for i in range(n):
                 for j in range(n):
-                    dfdx = lambda z,n,k: dzpsis(z,n)[k][0]*_J(z,n)[0][0]+dnpsis(z,n)[k][0]*_J(z,n)[0][1]
-                    dfdy = lambda z,n,k: dzpsis(z,n)[k][0]*_J(z,n)[1][0]+dnpsis(z,n)[k][0]*_J(z,n)[1][1]
-                    psi = lambda z,n,k: psis(z,n)[k][0]
-                    EK = lambda z,n: ( a11(x(z,n),y(z,n))*dfdx(z,n,i)*dfdx(z,n,j) + a12(x(z,n),y(z,n))*dfdx(z,n,i)*dfdy(z,n,j) + a21(x(z,n),y(z,n))*dfdy(z,n,i)*dfdx(z,n,j) + a22(x(z,n),y(z,n))*dfdy(z,n,i)*dfdy(z,n,j) +a00(x(z,n),y(z,n))*psi(z,n,i)*psi(z,n,j) )*np.linalg.det(J(z,n))
+                    def dfdx(n,z,k):
+                        jacobiano = _J(n,z)
+                        return dzpsi[k](n, z) * jacobiano[0][0] + dnpsi[k](n, z) * jacobiano[0][1]
+                    def dfdy(n,z,k):
+                        jacobiano = _J(n,z)
+                        return dzpsi[k](n, z) * jacobiano[1][0] + dnpsi[k](n, z) * jacobiano[1][1]
+                    def EK(z,n):
+                        X = x(z,n)
+                        Y = y(z,n)
+                        return (a11(X,Y)*dfdx(z,n,i)*dfdx(z,n,j) + a12(X,Y)*dfdx(z,n,i)*dfdy(z,n,j) + a21(X,Y)*dfdy(z,n,i)*dfdx(z,n,j) + a22(X,Y)*dfdy(z,n,i)*dfdy(z,n,j) +a00(X,Y)*psi(z,n,i)*psi(z,n,j) )*np.linalg.det(J(z,n))
                     K[i,j] = e.intGauss2D(gauss,EK)
                 EF = lambda z,n: f(x(z,n),y(z,n))*psi(z,n,i)*np.linalg.det(J(z,n))
                 F[i] = e.intGauss2D(gauss,EF)

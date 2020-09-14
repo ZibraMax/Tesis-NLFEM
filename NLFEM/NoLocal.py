@@ -59,24 +59,21 @@ class NoLocal(FEM):
         for e in this.elementos:
             count += 1
             progressbar(count, len(this.elementos), prefix="Integrando elementos ", size=50)
-            psis = e.psis
-            dzpsis = e.dzpsis
-            dnpsis = e.dnpsis
+            psi = lambda z, n, k: e.psi[k](z, n)
+            dzpsi = e.dzpsi
+            dnpsi = e.dnpsi
             gauss = e.gauss
             _J = e._J
             J = e.J
             x = e.Tx
             y = e.Ty
 
-            n = len(psis(0, 0))
+            n = len(e.coords)
 
             Kuu = np.zeros([n, n])
             Kuv = np.zeros([n, n])
             Kvu = np.zeros([n, n])
             Kvv = np.zeros([n, n])
-
-            Qu = np.zeros([n, 1])
-            Qv = np.zeros([n, 1])
 
             Fu = np.zeros([n, 1])
             Fv = np.zeros([n, 1])
@@ -89,9 +86,12 @@ class NoLocal(FEM):
             C66 = E / 2 / (1 + v)
             for i in range(n):
                 for j in range(n):
-                    dfdx = lambda z, n, k: dzpsis(z, n)[k][0] * _J(z, n)[0][0] + dnpsis(z, n)[k][0] * _J(z, n)[0][1]
-                    dfdy = lambda z, n, k: dzpsis(z, n)[k][0] * _J(z, n)[1][0] + dnpsis(z, n)[k][0] * _J(z, n)[1][1]
-                    psi = lambda z, n, k: psis(z, n)[k][0]
+                    def dfdx(n,z,k):
+                        jacobiano = _J(n,z)
+                        return dzpsi[k](n, z) * jacobiano[0][0] + dnpsi[k](n, z) * jacobiano[0][1]
+                    def dfdy(n,z,k):
+                        jacobiano = _J(n,z)
+                        return dzpsi[k](n, z) * jacobiano[1][0] + dnpsi[k](n, z) * jacobiano[1][1]
 
                     EKuu = lambda z, n: (C11 * dfdx(z, n, i) * dfdx(z, n, j) + C66 * dfdy(z, n, i) * dfdy(z, n,
                                                                                                           j)) * np.linalg.det(
@@ -127,6 +127,9 @@ class NoLocal(FEM):
             F[np.ix_(MD[1])] = Fv
             Knl = []
             countnl = 0
+            dzpsis = e.dzpsi
+            dnpsis = e.dnpsi
+            psi = e.psi
             for enl in this.elementos:
                 countnl+=1
                 psisnl = e.psis
@@ -155,38 +158,49 @@ class NoLocal(FEM):
 
                 def A(X, XP, l=0.1,t=0.5):
                     l0 = (1)/(2*np.pi*l**2*t)
-                    return l0 * np.exp(
-                        -distancia(x(X[0], X[1]), y(X[0], X[1]), xnl(XP[0], XP[1]), ynl(XP[0], XP[1])) / l)
-
-                for i in range(nnl):
+                    return l0 * np.exp(-distancia(x(X[0], X[1]), y(X[0], X[1]), xnl(XP[0], XP[1]), ynl(XP[0], XP[1])) / l)
+                dzpsisnl = enl.dzpsi
+                dnpsisnl = enl.dnpsi
+                psinl = enl.psi
+                for i in range(n):
                     for j in range(nnl):
-                        dfdxnl = lambda z, n, k: dzpsisnl(z, n)[k][0] * _Jnl(z, n)[0][0] + dnpsisnl(z, n)[k][0] * \
-                                                 _Jnl(z, n)[0][1]
-                        dfdynl = lambda z, n, k: dzpsisnl(z, n)[k][0] * _Jnl(z, n)[1][0] + dnpsisnl(z, n)[k][0] * \
-                                                 _Jnl(z, n)[1][1]
-                        psinl = lambda z, n, k: psisnl(z, n)[k][0]
 
-                        EKuunl = lambda z, n, znl, nnl: A([z, n], [znl, nnl]) * (
-                                    C11 * dfdx(z, n, i) * dfdxnl(znl, nnl, j) + C66 * dfdy(z, n, i) * dfdynl(znl, nnl,
-                                                                                                             j)) * np.linalg.det(
-                            J(z, n)) * np.linalg.det(Jnl(znl, nnl))
-                        EKuvnl = lambda z, n, znl, nnl: A([z, n], [znl, nnl]) * (
-                                    C12 * dfdx(z, n, i) * dfdynl(znl, nnl, j) + C66 * dfdy(z, n, i) * dfdxnl(znl, nnl,
-                                                                                                             j)) * np.linalg.det(
-                            J(z, n)) * np.linalg.det(Jnl(znl, nnl))
-                        EKvunl = lambda z, n, znl, nnl: A([z, n], [znl, nnl]) * (
-                                    C12 * dfdy(z, n, i) * dfdxnl(znl, nnl, j) + C66 * dfdx(z, n, i) * dfdynl(znl, nnl,
-                                                                                                             j)) * np.linalg.det(
-                            J(z, n)) * np.linalg.det(Jnl(znl, nnl))
-                        EKvvnl = lambda z, n, znl, nnl: A([z, n], [znl, nnl]) * (
-                                    C11 * dfdy(z, n, i) * dfdynl(znl, nnl, j) + C66 * dfdx(z, n, i) * dfdxnl(znl, nnl,
-                                                                                                             j)) * np.linalg.det(
-                            J(z, n)) * np.linalg.det(Jnl(znl, nnl))
+                        def FUNCIONES(z,n,znl,nnl):
 
-                        Kuunl[i, j] = e.intGauss4DNL(gaussnl, EKuunl)
-                        Kuvnl[i, j] = e.intGauss4DNL(gaussnl, EKuvnl)
-                        Kvunl[i, j] = e.intGauss4DNL(gaussnl, EKvunl)
-                        Kvvnl[i, j] = e.intGauss4DNL(gaussnl, EKvvnl)
+                            jacobianonl = Jnl(znl,nnl)
+                            jacobiano_nl = _Jnl(znl,nnl)
+                            jacobiano_ = _J(z,n)
+                            jacobiano = J(z,n)
+
+                            detjacnl = np.linalg.det(jacobianonl)
+                            detjac = np.linalg.det(jacobiano)
+                            dz_i = dzpsis[i](z,n)
+                            dn_i = dnpsis[i](z,n)
+                            psis_i = psi[i](z,n)
+
+                            dfdx_i = dz_i * jacobiano_[0][0] + dn_i* jacobiano_[0][1]
+                            dfdy_i = dz_i * jacobiano_[1][0] + dn_i* jacobiano_[1][1]
+
+
+                            dznl_j = dzpsisnl[j](znl,nnl)
+                            dnnl_j = dnpsisnl[j](znl,nnl)
+                            psisnl_j = psinl[j](znl,nnl)
+
+                            dfdxnl_j = dznl_j * jacobiano_nl[0][0] + dnnl_j* jacobiano_nl[0][1]
+                            dfdynl_j = dznl_j * jacobiano_nl[1][0] + dnnl_j* jacobiano_nl[1][1]
+
+                            AZN = A([z, n], [znl, nnl])
+
+                            EKuunl = AZN * (C11 * dfdx_i * dfdxnl_j + C66 * dfdy_i * dfdynl_j) * detjac * detjacnl
+                            EKuvnl = AZN * (C12 * dfdx_i * dfdynl_j + C66 * dfdy_i * dfdxnl_j) * detjac * detjacnl
+                            EKvunl = AZN * (C12 * dfdy_i * dfdxnl_j + C66 * dfdx_i * dfdynl_j) * detjac * detjacnl
+                            EKvvnl = AZN * (C11 * dfdy_i * dfdynl_j + C66 * dfdx_i * dfdxnl_j) * detjac * detjacnl
+                            return np.array([EKuunl,EKuvnl,EKvunl,EKvvnl])
+                        matrices = e.intGauss4DNL(gaussnl,FUNCIONES,shape=[4,1])
+                        Kuunl[i, j] = matrices[0]
+                        Kuvnl[i, j] = matrices[1]
+                        Kvunl[i, j] = matrices[2]
+                        Kvvnl[i, j] = matrices[3]
 
                 Knlmn[np.ix_(MD[0], MD[0])] = Kuunl
                 Knlmn[np.ix_(MD[0], MD[1])] = Kuvnl
@@ -269,6 +283,16 @@ class NoLocal(FEM):
         ax.set_xlabel('x')
         ax.set_ylabel('y')
         ax.set_title(r'$\frac{\partial U}{\partial X}$')
+    def ensamblar(this):
+        z1 = this.z1
+        z2 = 1- z1
+        for e in this.elementos:
+            this.K[np.ix_(e.gdl,e.gdl)] += e.Ke*z1
+            for i,enl in enumerate(this.elementos):
+                this.K[np.ix_(e.gdl,enl.gdl)] += e.KNLS[i]*z2
+            this.F[np.ix_(e.gdl)] += e.Fe
+            this.Q[np.ix_(e.gdl)] += e.Qe
+        this._K = np.copy(this.K)
 
 def postProcesoX(this, U):
     X = np.array(this.coords)[:, 0].tolist()
@@ -294,9 +318,10 @@ def postProcesoX(this, U):
 def ex(e,z,n):
     dz = e.dzpsis(z, n)
     dn = e.dnpsis(z, n)
+    e.__n = len(e.coords)
     result = []
     for i in range(len(dz)):
         result.append(e._J(z, n) @ np.array([[dz[i][0]], [dn[i][0]]]))
     result = np.array(result)
-    dx = (e.Ue[np.ix_([0,2,4])].T @ result[:, 0])[0][0]
+    dx = (e.Ue[np.ix_(np.linspace(0,(e.__n)*2-1,(e.__n)*2)%2==0)].T @ result[:, 0])[0][0]
     return dx

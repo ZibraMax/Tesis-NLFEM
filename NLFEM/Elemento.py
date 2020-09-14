@@ -11,26 +11,11 @@ mpl.style.use('default')
 
 class Elemento:
     def __init__(this, coords, gdl=None, gauss=4):
-        this.__n = len(this.psi)
         this.coords = coords
+        this.__n = len(coords)
         this.gauss = gauss
         this.gdl = gdl
         this.transfCoords()
-    def psis(this,z,n):
-        arreglo = []
-        for psi in this.psi:
-            arreglo.append(psi(z,n))
-        return np.array(arreglo).reshape([this.__n,1])
-    def dzpsis(this,z,n):
-        arreglo = []
-        for psi in this.dzpsi:
-            arreglo.append(psi(z,n))
-        return np.array(arreglo).reshape([this.__n,1])
-    def dnpsis(this,z,n):
-        arreglo = []
-        for psi in this.dnpsi:
-            arreglo.append(psi(z,n))
-        return np.array(arreglo).reshape([this.__n,1])
     def transfCoords(this):
         psis = this.psis
         dzpsis = this.dzpsis
@@ -45,36 +30,6 @@ class Elemento:
         this.Ty = lambda z, n: np.array(coords)[:, 1] @ psis(z, n)
         this.J = lambda z, n: np.array([[dxdz(z, n)[0], dydz(z, n)[0]], [dxdn(z, n)[0], dydn(z, n)[0]]])
         this._J = lambda z, n: np.linalg.inv(this.J(z, n))
-
-    def calcularMatrices(this):
-        psis = this.psis
-        dzpsis = this.dzpsis
-        dnpsis = this.dnpsis
-        gauss = this.gauss
-        _J = this._J
-        J = this.J
-        n = len(this.coords)
-        K = np.zeros([n, n])
-        Q = np.zeros([n, 1])
-        M = np.zeros([n, n])
-        F = np.zeros([n, 1])
-        for i in range(n):
-            for j in range(n):
-                dfdx = lambda n, z, k: dzpsis(n, z)[k][0] * _J(n, z)[0][0] + dnpsis(n, z)[k][0] * _J(n, z)[0][1]
-                dfdy = lambda n, z, k: dzpsis(n, z)[k][0] * _J(n, z)[1][0] + dnpsis(n, z)[k][0] * _J(n, z)[1][1]
-                psi = lambda n, z, k: psis(n, z)[k][0]
-                ecuacionK = lambda n, z: (dfdx(n, z, i) * dfdx(n, z, j) + dfdy(n, z, i) * dfdy(n, z,
-                                                                                               j)) * np.linalg.det(
-                    J(n, z))
-                ecuacionM = lambda n, z: (psi(n, z, i) * psi(n, z, j)) * np.linalg.det(J(n, z))
-                K[i, j] = this.intGauss2D(gauss, ecuacionK)
-                M[i, j] = this.intGauss2D(gauss, ecuacionM)
-            ecuacionF = lambda z, n: psi(z, n, i) * np.linalg.det(J(z, n))
-            F[i] = this.intGauss2D(gauss, ecuacionF)
-        this.Ke = K
-        this.Me = M
-        this.Fe = F
-        this.Qe = Q
 
     def dibujarPsis(this):
 
