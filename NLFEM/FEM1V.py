@@ -55,16 +55,20 @@ class FEM1V(FEM):
             psi = lambda z,n,k: e.psi[k](z,n)
             for i in range(n):
                 for j in range(n):
-                    def dfdx(n,z,k):
-                        jacobiano = _J(n,z)
-                        return dzpsi[k](n, z) * jacobiano[0][0] + dnpsi[k](n, z) * jacobiano[0][1]
-                    def dfdy(n,z,k):
-                        jacobiano = _J(n,z)
-                        return dzpsi[k](n, z) * jacobiano[1][0] + dnpsi[k](n, z) * jacobiano[1][1]
-                    def EK(z,n):
+                    def FUNCION(z,n):
                         X = x(z,n)
                         Y = y(z,n)
-                        return (a11(X,Y)*dfdx(z,n,i)*dfdx(z,n,j) + a12(X,Y)*dfdx(z,n,i)*dfdy(z,n,j) + a21(X,Y)*dfdy(z,n,i)*dfdx(z,n,j) + a22(X,Y)*dfdy(z,n,i)*dfdy(z,n,j) +a00(X,Y)*psi(z,n,i)*psi(z,n,j) )*np.linalg.det(J(z,n))
+                        jacobiano = _J(z,n)
+                        detjac = np.linalg.det(J(z,n))
+                        dfdx_i = dzpsi[i](n, z) * jacobiano[0][0] + dnpsi[i](n, z) * jacobiano[0][1]
+                        dfdy_i = dzpsi[i](n, z) * jacobiano[1][0] + dnpsi[i](n, z) * jacobiano[1][1]
+
+                        dfdx_j = dzpsi[j](n, z) * jacobiano[0][0] + dnpsi[j](n, z) * jacobiano[0][1]
+                        dfdy_j = dzpsi[j](n, z) * jacobiano[1][0] + dnpsi[j](n, z) * jacobiano[1][1]
+
+                        psi_i = e.psi[i](z,n)
+                        psi_j = e.psi[j](z,n)
+                        return (a11(X,Y)*dfdx_i*dfdx_j + a12(X,Y)*dfdx_i*dfdy_j + a21(X,Y)*dfdy_i*dfdx_j + a22(X,Y)*dfdy_i*dfdy_j +a00(X,Y)*psi_i*psi_j )*detjac
                     K[i,j] = e.intGauss2D(gauss,EK)
                 EF = lambda z,n: f(x(z,n),y(z,n))*psi(z,n,i)*np.linalg.det(J(z,n))
                 F[i] = e.intGauss2D(gauss,EF)
