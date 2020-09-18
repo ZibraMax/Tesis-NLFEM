@@ -298,7 +298,7 @@ class NoLocal(FEM):
         z2 = 1- z1
         for e in this.elementos:
             this.K[np.ix_(e.gdl,e.gdl)] += e.Ke*z1
-            for i,enl in enumerate(this.elementos):
+            for i,enl in enumerate(np.array(this.elementos)[e.elementosnl]):
                 this.K[np.ix_(e.gdl,enl.gdl)] += e.KNLS[i]*z2
             this.F[np.ix_(e.gdl)] += e.Fe
             this.Q[np.ix_(e.gdl)] += e.Qe

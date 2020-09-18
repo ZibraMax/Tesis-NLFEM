@@ -25,7 +25,7 @@ class Rect(Geometria):
 				diccionariosnl.append(linea)
 		segmentos.append([0,diccionarios[nx-1][1]])
 		segmentos.append([diccionarios[nx-1][1],diccionarios[nx*ny-1][2]])
-		segmentos.append([diccionarios[nx*ny-1][2],diccionarios[nx*ny-nx-1][3]])
-		segmentos.append([diccionarios[nx*ny-nx-1][3],0])
+		segmentos.append([diccionarios[nx*ny-1][2],diccionarios[nx*ny-nx][3]])
+		segmentos.append([diccionarios[nx*ny-nx][3],0])
 		super().__init__(vertices, diccionarios, gdls, tipos, segmentos=segmentos)
 		this.diccionariosnl = diccionariosnl

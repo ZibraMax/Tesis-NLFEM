@@ -1,5 +1,5 @@
-from NLFEM.Mesh import Geometria
-from NLFEM.Mesh import delaunay
+from Mesh import Geometria
+from Mesh import delaunay
 import matplotlib.pyplot as plt
 vertices = [-1]
 diccionarios = [[0,1,2],[0,2,4,3]]
