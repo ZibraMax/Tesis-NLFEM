@@ -25,8 +25,8 @@ class Geometria:
                 e[4] = f5
                 e[5] = f6
                 this._diccionarios.append([e[0],e[1],e[2]])
-            else:
-                this._diccionarios = this.diccionarios
+            elif this.tipos[i]=='C1V':
+                this._diccionarios.append([e[0],e[1],e[2],e[3]])
         this.Centroides = []
         for i, e in enumerate(this._diccionarios):
             coords = np.array(this.gdls)[np.ix_(e)]
@@ -44,8 +44,8 @@ class Geometria:
 
     def darNodosCB(this, segmento):
         a = []
-        ps = this.original['vertices'][this.original['segments'][segmento]].tolist()
-        for i, p in enumerate(this.triangular['vertices']):
+        ps = np.array(this.gdls)[this.segmentos[segmento]].tolist()
+        for i, p in enumerate(this.gdls):
             if isBetween(ps[0], ps[1], p):
                 a.append(i)
         return np.array(a)

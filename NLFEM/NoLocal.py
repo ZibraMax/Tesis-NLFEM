@@ -18,8 +18,10 @@ class NoLocal(FEM):
         super().__init__(2 * len(geometria.gdls))
         this.importarGeometria(geometria)
 
-    def generarElementos(this, gauss=4):
+    def generarElementos(this, gauss=3):
+        i = -1
         for d, t in zip(this.geometria.diccionarios, this.geometria.tipos):
+            i+=1
             coords = np.array(this.geometria.gdls)[np.ix_(d)]
             if t == 'T1V' or t == 'T2V':
                 if len(d) == 3:
@@ -52,6 +54,13 @@ class NoLocal(FEM):
                     this.elementos.append(CuadrilateroL(coords, d1, gauss=gauss))
             else:
                 raise Exception('No se pudo crear el elemento con coordenadas ' + format(coords))
+            try:
+                this.elementos[-1].elementosnl=this.geometria.diccionariosnl[i]
+            except:
+                this.elementos[-1].elementosnl=None
+        if this.elementos[-1].elementosnl == None:
+            for e in this.elementos:
+                e.elementosnl = np.linspace(0,len(this.elementos)-1,len(this.elementos)).astype(int).tolist()
 
     def calcularMatrices(this, E, v, Fx, Fy):
         distancia = lambda x0, y0, x1, y1: np.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2)
@@ -130,7 +139,8 @@ class NoLocal(FEM):
             dzpsis = e.dzpsi
             dnpsis = e.dnpsi
             psi = e.psi
-            for enl in this.elementos:
+            for p in e.elementosnl:
+                enl = this.elementos[p]
                 countnl+=1
                 psisnl = e.psis
                 dzpsisnl = enl.dzpsis
@@ -207,7 +217,7 @@ class NoLocal(FEM):
                 Knlmn[np.ix_(MD[1], MD[0])] = Kvunl
                 Knlmn[np.ix_(MD[1], MD[1])] = Kvvnl
                 Knl.append(Knlmn)
-                progressbar(countnl, len(this.elementos), prefix="Integrando elementos No Locales   ", size=50)
+                progressbar(countnl, len(e.elementosnl), prefix="Integrando elementos No Locales   ", size=50)
 
             e.determinarMatrices(K, F, Q)
             e.KNLS = Knl
@@ -317,6 +327,9 @@ def grad(this, z, n):
     for i in range(len(dz)):
         result.append(this._J(z, n) @ np.array([[dz[i][0]], [dn[i][0]]]))
     result = np.array(result)
-    dx = (this.Ue[[0,1,2,3,4,5]].T @ result[:, 0])[0][0]
-    dy = (this.Ue[[0,1,2,3,4,5]].T @ result[:, 1])[0][0]
-    return np.array([[dx], [dy]])
+    n = len(result)
+    U = np.linspace(0,n-1,n).astype(int)
+    V = U*2+1
+    dx = (this.Ue[np.ix_(U)].T @ result[:, 0])[0]
+    dy = (this.Ue[np.ix_(V)].T @ result[:, 1])[0]
+    return np.array([dx, dy])

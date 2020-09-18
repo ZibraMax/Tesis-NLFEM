@@ -19,3 +19,16 @@ class integradorRectangular(Elemento):
             for j,n in enumerate(Y):
                 INT += f(z,n)*Wx[i]*Wy[j]
         return INT
+    def intGauss4DNL(this,n,f,shape=[1]):
+        pyp = roots(n)
+        X = pyp[0]
+        Y = pyp[0]
+        Wx = pyp[1]
+        Wy = pyp[1]
+        INT = np.zeros(shape)
+        for i,z in enumerate(X):
+            for j,n in enumerate(Y):
+                for inl,znl in enumerate(X):
+                    for jnl,nnl in enumerate(Y):
+                        INT += f(z,n,znl,nnl)*Wx[i]*Wy[j]*Wx[inl]*Wy[jnl]
+        return INT

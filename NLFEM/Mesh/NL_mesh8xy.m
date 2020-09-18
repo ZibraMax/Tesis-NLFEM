@@ -4,11 +4,11 @@ clear all
 lr=6*0.1;
 %lr=0.75;
 %%%%%%
-lx=50;
-ly=1;
+lx=5;
+ly=5;
 t=0.1;
-nex=50;
-ney=50;
+nex=30;
+ney=30;
 nne=8;
 hx=lx/nex;
 hy=ly/ney;
@@ -162,7 +162,7 @@ for i=1:nnd
     fprintf(fid, '%12.8f\t %12.8f\n',x(i),y(i));
 end
 for i=1:nel
-    fprintf(fid, '%i\t %i\t %i\t %i\t %i\t %i\t %i\t %i\t %i\n',elm(i,1),elm(i,2),elm(i,3),elm(i,4),elm(i,5),elm(i,6),elm(i,7),elm(i,8),elm(i,9));
+    fprintf(fid, '%i\t %i\t %i\t %i\t %i\t %i\t %i\t %i\n',elm(i,1),elm(i,2),elm(i,3),elm(i,4),elm(i,5),elm(i,6),elm(i,7),elm(i,8));
 end
 for i=1:nel
     fprintf(fid, '%i\t',nle(i,1));
