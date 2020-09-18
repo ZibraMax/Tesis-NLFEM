@@ -262,27 +262,27 @@ class NoLocal(FEM):
         count=0
         fig = plt.figure()
         ax = fig.add_subplot(projection='3d')
-        xtotal = []
-        ytotal = []
-        ztotal = []
         markersize = 2
         cmap = 'magma'
         linewidth = 2
+        xtotal = []
+        ytotal = []
+        ztotal = []
+        count = 0
         for e in this.elementos:
-            count += 1
-            progressbar(count, len(this.elementos), prefix="Graficando derivada X ", size=50)
-            x, y, u = postProcesoX(e,this.U)
+            count+=1
+            progressbar(count,len(this.elementos), prefix="Graficando derivada x ", size=50)
+            x,y,u = postProcesoX(e,this.U)
             xtotal.extend(x)
             ytotal.extend(y)
             ztotal.extend(u)
-            X = np.array(e._coordenadas)[:, 0]
-            Y = np.array(e._coordenadas)[:, 1]
-            ax.plot(X, Y, 'ko-', markersize=markersize, color='black', linewidth=linewidth)
-        surf = ax.plot_trisurf(xtotal, ytotal, ztotal, cmap=cmap, zorder=1)
+        surf = ax.plot_trisurf(xtotal, ytotal, ztotal,cmap=cmap,zorder=1)
         cbar = fig.colorbar(surf)
         ax.set_xlabel('x')
         ax.set_ylabel('y')
+        ax.set_zlabel(r'$\varepsilon x$')
         ax.set_title(r'$\frac{\partial U}{\partial X}$')
+
     def ensamblar(this):
         z1 = this.z1
         z2 = 1- z1
@@ -295,11 +295,6 @@ class NoLocal(FEM):
         this._K = np.copy(this.K)
 
 def postProcesoX(this, U):
-    X = np.array(this.coords)[:, 0].tolist()
-    X.append(this.coords[0][0])
-    Y = np.array(this.coords)[:, 1].tolist()
-    Y.append(this.coords[0][1])
-    this._coordenadas = np.array([X, Y]).T
     this.Ue = U[np.ix_(this.gdl)]
     this._Ue = this.Ue.T[0].tolist()
     this._Ue.append(this.Ue[0][0])
@@ -308,20 +303,20 @@ def postProcesoX(this, U):
     x = []
     y = []
     u = []
-    this.U = lambda z, n: ex(this,z, n)
+    this.U = lambda z, n: grad(this, z, n)[0]
     for z, n in zip(Z, N):
         x.append(this.Tx(z, n)[0])
         y.append(this.Ty(z, n)[0])
-        print(this.U(z, n))
-        u.append(this.U(z, n))
+        u.append(this.U(z, n)[0])
     return x, y, u
-def ex(e,z,n):
-    dz = e.dzpsis(z, n)
-    dn = e.dnpsis(z, n)
-    e.__n = len(e.coords)
+
+def grad(this, z, n):
+    dz = this.dzpsis(z, n)
+    dn = this.dnpsis(z, n)
     result = []
     for i in range(len(dz)):
-        result.append(e._J(z, n) @ np.array([[dz[i][0]], [dn[i][0]]]))
+        result.append(this._J(z, n) @ np.array([[dz[i][0]], [dn[i][0]]]))
     result = np.array(result)
-    dx = (e.Ue[np.ix_(np.linspace(0,(e.__n)*2-1,(e.__n)*2)%2==0)].T @ result[:, 0])[0][0]
-    return dx
+    dx = (this.Ue[[0,1,2,3,4,5]].T @ result[:, 0])[0][0]
+    dy = (this.Ue[[0,1,2,3,4,5]].T @ result[:, 1])[0][0]
+    return np.array([[dx], [dy]])

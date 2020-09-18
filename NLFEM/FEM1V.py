@@ -183,7 +183,7 @@ class FEM1V(FEM):
         ax.set_xlabel('x')
         ax.set_ylabel('y')
         ax.axes.set_aspect('equal')
-        ax.set_title(r'$\frac{\partial U}{\partial X}$')
+        ax.set_title(r'$\frac{\partial U}{\partial Y}$')
         if not mask== None:
             cornersnt = np.array(mask[::-1])
 
