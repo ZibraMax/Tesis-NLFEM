@@ -92,10 +92,10 @@ class Elemento:
         z = []
         for i, j in zip(x, y):
             z.append(np.linalg.det(J(i, j)))
-        fig = plt.figure(figsize=figsize)
-        ax = fig.add_subplot(projection='3d')
-        surf = ax.plot_trisurf(x, y, np.array(z), cmap='magma')
-        cbar = fig.colorbar(surf)
+            fig = plt.figure(figsize=figsize)
+            ax = fig.add_subplot(projection='3d')
+            surf = ax.plot_trisurf(x, y, np.array(z), cmap='magma')
+            cbar = fig.colorbar(surf)
         ax.set_xlabel(r'$\zeta$')
         ax.set_ylabel(r'$\eta$')
         ax.set_zlabel(r'$|\mathcal{J}|$')

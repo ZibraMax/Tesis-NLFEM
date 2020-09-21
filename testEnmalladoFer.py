@@ -6,7 +6,7 @@ import os
 
 PATH = os.getcwd()
 nombre = "\\NLFEM\\Mesh\\input.txt"
-GEOMETRIA = Rect.Rect(PATH+nombre)
+GEOMETRIA = Rect.Rect(PATH+nombre,10,10)
 
 GEOMETRIA.dibujarse()
 
@@ -40,7 +40,7 @@ u = 0.001
 Objeto_FEM = NLFEM.NoLocal(GEOMETRIA)
 GEOMETRIA.cbe = generarCBdesdeBorde(GEOMETRIA,3,[0,0])+generarCBdesdeBordeX(GEOMETRIA,1,u)
 Objeto_FEM.definirCondicionesDeBorde(GEOMETRIA.cbe)
-z1=0.6
+z1=0.5
 Objeto_FEM.z1 = z1
 Objeto_FEM.solucionar(E=E,v=V,Fx=lambda x,y: 0,Fy=lambda x,y: 0,plot=True)
 Ke = Objeto_FEM.elementos[0].Ke*z1+Objeto_FEM.elementos[0].KNLS[0]*(1-z1)
