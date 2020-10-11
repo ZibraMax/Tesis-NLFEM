@@ -71,9 +71,13 @@ int main () {
 	ELEMENTOS = leerTexto("input.txt");
 	ofstream Archivo("elementos.csv");
 	for (Serendipity elemento: ELEMENTOS) {
-		for (vector<double> vertice: elemento.vertices) {
-			for (double coordenada: vertice) {
-				Archivo << coordenada << ",";
+		for (int i = 0; i < 3; ++i) {
+			for (int j = 0; j < 3; ++j) {
+				vector<double> psis_i = elemento.psis(i/3.0,j/3.0);
+				for (double funcion_i: psis_i) {
+					Archivo << funcion_i << ",";
+				}
+				Archivo << endl;
 			}
 		}
 		Archivo << endl;

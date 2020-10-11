@@ -20,6 +20,19 @@ class Serendipity {
 			}
 			return v;
 		}
+		vector<double> psis(double z, double n) {
+			vector<double> foo{
+				(double) 1/4*(1-z)*(1-n)*(-1-z-n),
+				(double) 1/4*(1+z)*(1-n)*(-1+z-n),
+				(double) 1/4*(1+z)*(1+n)*(-1+z+n),
+				(double) 1/4*(1-z)*(1+n)*(-1-z+n),
+				(double) 1/2*(1-z*z)*(1-n),
+				(double) 1/2*(1+z)*(1-n*n),
+				(double) 1/2*(1-z*z)*(1+n),
+				(double) 1/2*(1-z)*(1-n*n)
+				};
+			return foo;
+		}
 		void imprimirse() {
 			for (vector<double> vertice: vertices) {
 				for (double coordenada: vertice) {
