@@ -1,0 +1,9 @@
+# Specify filepatterns you want git to ignore.
+
+NLFEM_C++/NLFEM/MATRICES/
+NLFEM_C++/NLFEM/Resultados.zip
+.idea
+.ipynb_checkpoints
+MatricesElementos/
+*.svg
+*.csv
