@@ -6,23 +6,21 @@
 #include <cstdlib>
 #include <cmath>
 #include <sys/stat.h>
-
 #include "Eigen/Dense"
+using namespace Eigen;
+using namespace std;
 
-#define pi 2*asin(1.0)
-#define l 0.1
-#define t 0.5
-#define E 2.1E6
-#define v 0.2
+double t = 0.5;
+double E = 2.1*pow(10.0,6);
+double v = 0.2;
 
+double l = 0.1;
 double C11 = E/(1.0-v*v);
 double C12 = v*E/(1.0-v*v);
 double C66 = E/2/(1.0+v);
+const double PI_calc  = 3.141592653589793238463;
+double L0 = (1.0)/(2*PI_calc*l*l*t);
 
-double L0 = (1.0)/(2*pi*l*l*t);
-
-using namespace std;
-using namespace Eigen;
 
 
 double PUNTOS[] = {-sqrt(3.0/5.0),0,sqrt(3.0/5.0)};
@@ -89,7 +87,8 @@ vector<Serendipity> leerTexto(string filename) {
 	return ELEMENTOS;
 }
 void writeToCSVfile(string name, MatrixXd matrix) {
-	const static IOFormat CSVFormat(StreamPrecision, DontAlignCols, ", ", "\n");
+	cout.precision(15);
+	const static IOFormat CSVFormat(FullPrecision, DontAlignCols, ", ", "\n");
 	ofstream Archivo(name.c_str());
     Archivo << matrix.format(CSVFormat);
 	Archivo.close();
@@ -99,6 +98,7 @@ double atenuacion(double x,double y,double xnl,double ynl) {
 	return L0*exp(-distancia/l);
 }
 int main () {
+	cout<<PI_calc<<endl;
 	vector<Serendipity> ELEMENTOS;
 	ELEMENTOS = leerTexto("input.txt");
 	int conti = 0;
@@ -152,9 +152,9 @@ int main () {
                             double dfdy_i = dz_i * jacobiano_[1][0] + dn_i* jacobiano_[1][1];
 
 							for (int i_nl = 0; i_nl < NG; ++i_nl) {
-								double znl = PUNTOS[i];
+								double znl = PUNTOS[i_nl];
 								for (int j_nl = 0; j_nl < NG; ++j_nl) {
-									double nnl = PUNTOS[j];
+									double nnl = PUNTOS[j_nl];
 									double xnl = enl.TX(znl,nnl);
 									double ynl = enl.TY(znl,nnl);
 									vector<double> jacobianosnl;

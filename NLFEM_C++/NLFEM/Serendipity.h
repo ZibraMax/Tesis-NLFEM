@@ -1,6 +1,5 @@
 #include <vector>
 #include <iostream>
-#include "Eigen/Dense"
 using namespace std;
 
 class Serendipity {
@@ -17,8 +16,8 @@ class Serendipity {
 			nolocales = pnolocales;
 			coords = darCoordenadas(COORDENADAS,gdl);
 			for (int i = 0; i < coords.size(); ++i) {
-				X.push_back(coords[i][0]);
-				Y.push_back(coords[i][1]);
+				X.push_back((double) coords[i][0]);
+				Y.push_back((double) coords[i][1]);
 			}
 		}
 		double TX(double z,double n) {
@@ -85,10 +84,10 @@ class Serendipity {
 			return foo;
 		}
 		vector<double> transfCoordenadas(double z,double n) {
-			double dxdz = 0;
-			double dydz = 0;
-			double dxdn = 0;
-			double dydn = 0;
+			double dxdz = 0.0;
+			double dydz = 0.0;
+			double dxdn = 0.0;
+			double dydn = 0.0;
 			vector<double> dzpsis_zn = dzpsis(z,n);
 			vector<double> dnpsis_zn = dnpsis(z,n);
 			for (int i = 0; i < coords.size(); ++i) {
@@ -99,7 +98,7 @@ class Serendipity {
 			}
 			J = {{dxdz,dydz},{dxdn,dydn}};
 			double determinanteJ = dxdz*dydn-dydz*dxdn;
-			_J = {{dydn*determinanteJ,-dydz*determinanteJ},{-dxdn*determinanteJ,dxdz*determinanteJ}};
+			_J = {{dydn*1/determinanteJ,-dydz*1/determinanteJ},{-dxdn*1/determinanteJ,dxdz*1/determinanteJ}};
 			double determinante_J = _J[0][0]*_J[1][1]-_J[0][1]*_J[1][0];
 			vector<double> retorno{determinanteJ,determinante_J};
 			return retorno;

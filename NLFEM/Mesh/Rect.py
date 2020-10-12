@@ -21,7 +21,7 @@ class Rect(Geometria):
 				linea = list(map(lambda x: int(x)-1,archivo.readline().split('	 ')))
 				diccionarios.append(linea)
 			for _ in range(nele):
-				linea = list(map(lambda x: int(x)-1,archivo.readline().split('	')))
+				linea = list(map(lambda x: int(x)-1,archivo.readline().split('	')[1:]))
 				diccionariosnl.append(linea)
 		segmentos.append([0,diccionarios[nx-1][1]])
 		segmentos.append([diccionarios[nx-1][1],diccionarios[nx*ny-1][2]])
