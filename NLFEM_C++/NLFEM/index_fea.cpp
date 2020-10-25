@@ -1,5 +1,3 @@
-// Integraci
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -27,9 +25,9 @@ double L0 = (1.0)/(2*PI_calc*l*l*t);
 
 
 
-vector<double> PUNTOS{-sqrt(3.0/5.0),0,sqrt(3.0/5.0)};
-int NG = PUNTOS.size();
-vector<double> PESOS{5.0/9.0,8.0/9.0,5.0/9.0};
+double PUNTOS[] = {-sqrt(3.0/5.0),0,sqrt(3.0/5.0)};
+int NG = sizeof(PUNTOS)/sizeof(PUNTOS[0]);
+double PESOS[] = {5.0/9.0,8.0/9.0,5.0/9.0};
 
 vector<string> split(const string& str, const string& delim)
 {
@@ -83,7 +81,7 @@ vector<Serendipity> leerTexto(string filename) {
 			for (int j = 1; j <= L; ++j) {
 				nolocales.push_back(stoi(linea[j])-1);
 			}
-			ELEMENTOS.push_back(Serendipity(elementos[i],nolocales,GDL,PUNTOS,PESOS,t));
+			ELEMENTOS.push_back(Serendipity(elementos[i],nolocales,GDL));
 		}
 		myfile.close();
 	}
@@ -102,7 +100,7 @@ double atenuacion(double x,double y,double xnl,double ynl) {
 	return L0*exp(-distancia/l);
 }
 int main () {
-	cout<<"Implementacion funcional"<<endl;
+	cout<<"Implementacion no funcional"<<endl;
 	vector<Serendipity> ELEMENTOS;
 	ELEMENTOS = leerTexto("input.txt");
 	int NUMERO_ELEMENTOS = ELEMENTOS.size();
@@ -122,7 +120,6 @@ int main () {
 	    char RutaChar[n + 1]; 
 	    strcpy(RutaChar, Ruta.c_str());
 		mkdir(RutaChar);
-		e.matrizLocal(C11,C12,C66,conti);
 		for (int indiceNoLocal: e.nolocales) {
 			contj++;
 			Serendipity enl = ELEMENTOS[indiceNoLocal];
@@ -149,8 +146,11 @@ int main () {
 							double detjac = jacobianos[0];
 							vector<vector<double>> jacobiano_ = e._J;
 
-                            double dz_i = e.dzpsi[gdli](z,n);
-                            double dn_i = e.dnpsi[gdli](z,n);
+                            vector<double> dzpsis = e.dzpsis(z,n);
+                            vector<double> dnpsis = e.dnpsis(z,n);
+
+                            double dz_i = dzpsis[gdli];
+                            double dn_i = dnpsis[gdli];
 
                             double dfdx_i = dz_i * jacobiano_[0][0] + dn_i* jacobiano_[0][1];
                             double dfdy_i = dz_i * jacobiano_[1][0] + dn_i* jacobiano_[1][1];
@@ -167,16 +167,19 @@ int main () {
 									vector<vector<double>> jacobiano_nl = enl._J;
 									double detjacnl = jacobianosnl[0];
 
-		                            double dznl_j = enl.dzpsi[gdlj](znl,nnl);
-		                            double dnnl_j = enl.dnpsi[gdlj](znl,nnl);
+		                            vector<double> dzpsisnl = enl.dzpsis(znl,nnl);
+		                            vector<double> dnpsisnl = enl.dnpsis(znl,nnl);
+
+		                            double dznl_j = dzpsisnl[gdlj];
+		                            double dnnl_j = dnpsisnl[gdlj];
 
 		                            double dfdxnl_j = dznl_j * jacobiano_nl[0][0] + dnnl_j* jacobiano_nl[0][1];
 		                            double dfdynl_j = dznl_j * jacobiano_nl[1][0] + dnnl_j* jacobiano_nl[1][1];
 									double AZN = atenuacion(x,y,xnl,ynl);
-									KKUU += t * t * AZN * (C11 * dfdx_i * dfdxnl_j + C66 * dfdy_i * dfdynl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
-									KKUV += t * t * AZN * (C12 * dfdx_i * dfdynl_j + C66 * dfdy_i * dfdxnl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
-									KKVU += t * t * AZN * (C12 * dfdy_i * dfdxnl_j + C66 * dfdx_i * dfdynl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
-									KKVV += t * t * AZN * (C11 * dfdy_i * dfdynl_j + C66 * dfdx_i * dfdxnl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
+									KKUU += AZN * (C11 * dfdx_i * dfdxnl_j + C66 * dfdy_i * dfdynl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
+									KKUV += AZN * (C12 * dfdx_i * dfdynl_j + C66 * dfdy_i * dfdxnl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
+									KKVU += AZN * (C12 * dfdy_i * dfdxnl_j + C66 * dfdx_i * dfdynl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
+									KKVV += AZN * (C11 * dfdy_i * dfdynl_j + C66 * dfdx_i * dfdxnl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
 								}
 							}
 						}
@@ -194,7 +197,7 @@ int main () {
 		auto stop = high_resolution_clock::now();
 		auto duration = duration_cast<milliseconds>(stop - start);
 		double porcentaje = 100.0*conti/NUMERO_ELEMENTOS;
-		cout<<"Local: "<<conti<<" - Tiempo: "<< duration.count()<<"ms - "<< porcentaje << "%"<<endl;
+		cout<<"Local: "<<conti<<" - Tiempo: "<< duration.count()<<"ms - "<<porcentaje<< "%"<<endl;
 	}
 	return 0;
 }

@@ -1,6 +1,23 @@
-#include <vector>
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <cstdlib>
+#include <cmath>
+#include <sys/stat.h>
+#include "Eigen/Dense"
+#include <chrono> 
+using namespace std::chrono;
+using namespace Eigen;
 using namespace std;
+
+void guardarMatriz(string name, MatrixXd matrix) {
+	cout.precision(15);
+	const static IOFormat CSVFormat(FullPrecision, DontAlignCols, ", ", "\n");
+	ofstream Archivo(name.c_str());
+    Archivo << matrix.format(CSVFormat);
+	Archivo.close();
+}
 
 class Serendipity {
 	public:
@@ -11,8 +28,45 @@ class Serendipity {
 		vector<double> Y;
 		vector<vector<double>> J;
 		vector<vector<double>> _J;
-		Serendipity(vector<int> pgdls, vector<int> pnolocales,double COORDENADAS[][2]) {
+		vector<double> PUNTOS;
+		vector<double> PESOS;
+
+		double t;
+		vector<function<double(double,double)>> psi{
+		[](double z, double n){return (double) 1/4*(1-z)*(1-n)*(-1-z-n);},
+		[](double z, double n){return (double) 1/4*(1+z)*(1-n)*(-1+z-n);},
+		[](double z, double n){return (double) 1/4*(1+z)*(1+n)*(-1+z+n);},
+		[](double z, double n){return (double) 1/4*(1-z)*(1+n)*(-1-z+n);},
+		[](double z, double n){return (double) 1/2*(1-z*z)*(1-n);},
+		[](double z, double n){return (double) 1/2*(1+z)*(1-n*n);},
+		[](double z, double n){return (double) 1/2*(1-z*z)*(1+n);},
+		[](double z, double n){return (double) 1/2*(1-z)*(1-n*n);}};
+
+		vector<function<double(double,double)>> dzpsi{
+		[](double z, double n){return (double) -1/4*(n-1)*(2*z+n);},
+		[](double z, double n){return (double) -1/4*(n-1)*(2*z-n);},
+		[](double z, double n){return (double) 1/4*(n+1)*(2*z+n);},
+		[](double z, double n){return (double) 1/4*(n+1)*(2*z-n);},
+		[](double z, double n){return (double) (n-1)*z;},
+		[](double z, double n){return (double) -1/2*(n*n-1);},
+		[](double z, double n){return (double) -(n+1)*z;},
+		[](double z, double n){return (double) 1/2*(n*n-1);}};
+
+		vector<function<double(double,double)>> dnpsi{
+		[](double z, double n){return (double) -1/4*(z-1)*(2*n+z);},
+		[](double z, double n){return (double) 1/4*(z+1)*(2*n-z);},
+		[](double z, double n){return (double) 1/4*(z+1)*(2*n+z);},
+		[](double z, double n){return (double) -1/4*(z-1)*(2*n-z);},
+		[](double z, double n){return (double) 1/2*(z*z-1);},
+		[](double z, double n){return (double) -n*(z+1);},
+		[](double z, double n){return (double) -1/2*(z*z-1);},
+		[](double z, double n){return (double) n*(z-1);}};
+
+		Serendipity(vector<int> pgdls, vector<int> pnolocales,double COORDENADAS[][2],vector<double> ppgauss,vector<double> pwgauss,double pt) {
+			PUNTOS = ppgauss;
+			PESOS =pwgauss;
 			gdl = pgdls;
+			t = pt;
 			nolocales = pnolocales;
 			coords = darCoordenadas(COORDENADAS,gdl);
 			for (int i = 0; i < coords.size(); ++i) {
@@ -26,15 +80,15 @@ class Serendipity {
 			for (int i = 0; i < psiszn.size(); ++i) {
 				res+=X[i]*psiszn[i];
 			}
-		    return res;
+			return res;
 		}
 		double TY(double z,double n) { 
-		    double res = 0;
-		    vector<double> psiszn = psis(z,n);
+			double res = 0;
+			vector<double> psiszn = psis(z,n);
 			for (int i = 0; i < psiszn.size(); ++i) {
 				res+=Y[i]*psiszn[i];
 			}
-		    return res;
+			return res;
 		}
 		vector<vector<double>> darCoordenadas(double COORDENADAS[][2], vector<int> gdls) {
 			vector<vector<double>> v;
@@ -110,5 +164,57 @@ class Serendipity {
 				}
 				cout << endl;
 			}
+		}
+		void matrizLocal(double C11,double C12,double C66,int nelemento) {
+			int N = gdl.size();
+			MatrixXd KUU(N,N);
+			MatrixXd KUV(N,N);
+			MatrixXd KVU(N,N);
+			MatrixXd KVV(N,N);
+			for (int gdli = 0; gdli < N; ++gdli) {
+				for (int gdlj = 0; gdlj < N; ++gdlj) {
+					double KKUU = 0.0;
+					double KKUV = 0.0;
+					double KKVU = 0.0;
+					double KKVV = 0.0;
+
+					for (int i = 0; i < PUNTOS.size(); ++i) {
+						double z = PUNTOS[i];
+						for (int j = 0; j < PUNTOS.size(); ++j) {
+							double n = PUNTOS[j];
+
+							vector<double> jacobianos;
+
+							jacobianos = transfCoordenadas(z,n);
+
+							double detjac = jacobianos[0];
+
+							double dz_i = dzpsi[gdli](z,n);
+							double dn_i = dnpsi[gdli](z,n);
+
+							double dfdx_i = dz_i * _J[0][0] + dn_i* _J[0][1];
+							double dfdy_i = dz_i * _J[1][0] + dn_i* _J[1][1];
+
+							double dz_j = dzpsi[gdlj](z,n);
+							double dn_j = dnpsi[gdlj](z,n);
+
+							double dfdx_j = dz_j * _J[0][0] + dn_j* _J[0][1];
+							double dfdy_j = dz_j * _J[1][0] + dn_j* _J[1][1];
+
+							KKUU += (C11 * dfdx_i * dfdx_j + C66 * dfdy_i * dfdy_j) * detjac * PESOS[j] * PESOS[i] * t;
+							KKUV += (C12 * dfdx_i * dfdy_j + C66 * dfdy_i * dfdx_j) * detjac * PESOS[j] * PESOS[i] * t;
+							KKVU += (C12 * dfdy_i * dfdx_j + C66 * dfdx_i * dfdy_j) * detjac * PESOS[j] * PESOS[i] * t;
+							KKVV += (C11 * dfdy_i * dfdy_j + C66 * dfdx_i * dfdx_j) * detjac * PESOS[j] * PESOS[i] * t;
+						}
+					}
+					KUU(gdli,gdlj)=KKUU;
+					KUV(gdli,gdlj)=KKUV;
+					KVU(gdli,gdlj)=KKVU;
+					KVV(gdli,gdlj)=KKVV;
+				}
+			}
+			MatrixXd K(2*N, 2*N);
+			K<<KUU,KUV,KVU,KVV;
+			guardarMatriz("./MATRICES/Elemento"+to_string(nelemento)+"/KL_"+to_string(nelemento)+".csv",K);
 		}
 };
