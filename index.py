@@ -3,7 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from NLFEM.Mesh import Rect
 import os
-
+MATRICES_DESDE = 'C++'
+RUTA_M = ''
+if MATRICES_DESDE == 'FORTRAN':
+	RUTA_M = 'NLFEM_FORTRAN'
+elif MATRICES_DESDE == 'C++':
+	RUTA_M = 'NLFEM_C++/NLFEM/MATRICES'
+else:
+	print('Arturo por favor deja de jugar')
 def postProcesoX(this, U):
     this.Ue = U[np.ix_(this.gdl)]
     this._Ue = this.Ue.T[0].tolist()
@@ -133,9 +140,8 @@ GEOMETRIA.cbe = generarCBdesdeBorde(GEOMETRIA,3,[0,0])+generarCBdesdeBordeX(GEOM
 Objeto_FEM.definirCondicionesDeBorde(GEOMETRIA.cbe)
 Objeto_FEM.generarElementos()
 for i,e in enumerate(Objeto_FEM.elementos):
-    print(e.J(-0.5,0.5),e._J(-0.5,0.5),np.linalg.det(e.J(-0.5,0.5)))
     n = len(e.coords)
-    K = np.loadtxt('NLFEM_C++/NLFEM/MATRICES/Elemento'+format(i+1)+'/KL_'+format(i+1)+'.csv',delimiter=',')
+    K = np.loadtxt(RUTA_M+'/Elemento'+format(i+1)+'/KL_'+format(i+1)+'.csv',delimiter=',').reshape([16,16])
     Q = np.zeros([2 * n, 1])
     F = np.zeros([2 * n, 1])
     e.determinarMatrices(K,F,Q)
@@ -143,7 +149,7 @@ for i,e in enumerate(Objeto_FEM.elementos):
     j=0
     for _ in e.elementosnl:
         j+=1
-        KNL = np.loadtxt('NLFEM_C++/NLFEM/MATRICES/Elemento'+format(i+1)+'/KNL'+format(i+1)+'_'+format(j)+'.csv',delimiter=',')
+        KNL = np.loadtxt(RUTA_M+'/Elemento'+format(i+1)+'/KNL'+format(i+1)+'_'+format(j)+'.csv',delimiter=',').reshape([16,16])
         knls.append(KNL)
         e.KNLS = knls
     print(i)

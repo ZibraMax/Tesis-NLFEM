@@ -18,6 +18,7 @@ module MSerendipity
         procedure, pass :: TX
         procedure, pass :: TY
         procedure, pass :: JAC
+        procedure, pass :: ML
         procedure, pass :: MNL
 
     end type Serendipity
@@ -141,7 +142,89 @@ contains
             matriz(2,2)=matriz(2,2)+this%Y(i)*this%dnpsi(i,z,n)
         enddo
     end
+    subroutine ML(e,matriz,C11,C12,C66)
+        implicit none
+        real :: matriz(16,16)
+        integer :: gdli
+        integer :: gdlj
+        integer :: i
+        integer :: j
+        integer :: inl
+        integer :: jnl
 
+        real :: z
+        real :: n
+        real :: x
+        real :: y
+        real :: detjac
+        real :: jacobiano(2,2)
+        real :: jacobiano_(2,2)
+        real :: dz_i
+        real :: dn_i
+        real :: dfdx_i
+        real :: dfdy_i
+        real :: dz_j
+        real :: dn_j
+        real :: dfdx_j
+        real :: dfdy_j
+        real :: t
+        real :: C11
+        real :: C12
+        real :: C66
+        real :: an
+        real :: PESOS(3)
+
+        class(Serendipity), intent(inout) :: e
+
+        PESOS = e%PESOS
+        t = e%t
+        do i=1,16
+            do j=1,16
+                matriz(i,j)=0
+            enddo
+        enddo
+
+        do gdli=1,8
+            do gdlj=1,8
+                do i=1,3
+                    z = e%PUNTOS(i)
+                    do j=1,3
+                        n = e%PUNTOS(j)
+                        
+                        x = e%TX(z,n)
+                        y = e%TY(z,n)
+
+                        call e%JAC(jacobiano,z,n)
+                        detjac = jacobiano(1,1)*jacobiano(2,2)-jacobiano(1,2)*jacobiano(2,1)
+
+                        jacobiano_(1,1)=jacobiano(2,2)/detjac
+                        jacobiano_(1,2)=-jacobiano(1,2)/detjac
+                        jacobiano_(2,1)=-jacobiano(2,1)/detjac
+                        jacobiano_(2,2)=jacobiano(1,1)/detjac
+
+                        dz_i = e%dzpsi(gdli,z,n)
+                        dn_i = e%dnpsi(gdli,z,n)
+
+                        dfdx_i = dz_i * jacobiano_(1,1) + dn_i* jacobiano_(1,2)
+                        dfdy_i = dz_i * jacobiano_(2,1) + dn_i* jacobiano_(2,2)
+
+                        dz_j = e%dzpsi(gdlj,z,n)
+                        dn_j = e%dnpsi(gdlj,z,n)
+
+                        dfdx_J = dz_j * jacobiano_(1,1) + dn_j* jacobiano_(1,2)
+                        dfdy_J = dz_j * jacobiano_(2,1) + dn_j* jacobiano_(1,1)
+                        
+                        an = detjac*PESOS(j)*PESOS(i)
+
+                        matriz(gdli,gdlj)=matriz(gdli,gdlj)+t*(C11*dfdx_i*dfdx_j+C66*dfdy_i*dfdy_j)*an
+                        matriz(gdli,gdlj+8)=matriz(gdli,gdlj+8)+t*(C12*dfdx_i*dfdy_j+C66*dfdy_i*dfdx_j)*an
+                        matriz(gdli+8,gdlj)=matriz(gdli+8,gdlj)+t*(C12*dfdy_i*dfdx_j+C66*dfdx_i*dfdy_j)*an
+                        matriz(gdli+8,gdlj+8)=matriz(gdli+8,gdlj+8)+t*(C11*dfdy_i*dfdy_j+C66*dfdx_i*dfdx_j)*an
+                    enddo
+                enddo
+            enddo
+        enddo
+    end
     subroutine MNL(e,enl,matriz,C11,C12,C66)
         implicit none
         real :: matriz(16,16)
@@ -292,6 +375,7 @@ program NLFEM
 
     character(len=255) format
     real :: MATRIZ_NKLNM(16,16)
+    real :: MATRIZ_L(16,16)
 
     type(Serendipity), allocatable :: ELEMENTOS(:)
 
@@ -355,6 +439,10 @@ program NLFEM
         call cpu_time(start)
         write(X1,*) i
         call execute_command_line ('mkdir Elemento'// trim(adjustl(X1)))
+        call ELEMENTOS(i)%ML(MATRIZ_L,C11,C12,C66)
+        open(10,file='Elemento'//trim(adjustl(X1))//'/KL_'//trim(adjustl(X1))//'.csv')
+        write (10, "(*(G0,:,','))") MATRIZ_L
+        close(10)
         do j=2,ELEMENTOS(i)%nolocales(1)+1
             write(x2,*) (j-1)
             call ELEMENTOS(i)%MNL(ELEMENTOS(ELEMENTOS(i)%nolocales(j)),MATRIZ_NKLNM,C11,C12,C66)
