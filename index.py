@@ -133,6 +133,7 @@ GEOMETRIA.cbe = generarCBdesdeBorde(GEOMETRIA,3,[0,0])+generarCBdesdeBordeX(GEOM
 Objeto_FEM.definirCondicionesDeBorde(GEOMETRIA.cbe)
 Objeto_FEM.generarElementos()
 for i,e in enumerate(Objeto_FEM.elementos):
+    print(e.J(-0.5,0.5),e._J(-0.5,0.5),np.linalg.det(e.J(-0.5,0.5)))
     n = len(e.coords)
     K = np.loadtxt('NLFEM_C++/NLFEM/MATRICES/Elemento'+format(i+1)+'/KL_'+format(i+1)+'.csv',delimiter=',')
     Q = np.zeros([2 * n, 1])
