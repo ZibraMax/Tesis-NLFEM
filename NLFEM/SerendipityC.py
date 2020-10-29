@@ -2,6 +2,8 @@ from .integradorRectangular import *
 class SerendipityC(integradorRectangular):
     def __init__(this,coords,gdl=None,gauss=4):
         if len(coords) == 8:
+            this.ZNatural = [-1,1,1,-1,0,1,0,-1]
+            this.NNatural = [-1,-1,1,1,-1,0,1,0]
             this.psis = lambda z,n: np.array([[1/4*(1-z)*(1-n)*(-1-z-n)],[1/4*(1+z)*(1-n)*(-1+z-n)],[1/4*(1+z)*(1+n)*(-1+z+n)],[1/4*(1-z)*(1+n)*(-1-z+n)],[1/2*(1-z**2)*(1-n)],[1/2*(1+z)*(1-n**2)],[1/2*(1-z**2)*(1+n)],[1/2*(1-z)*(1-n**2)]])
             this.psi = np.array([lambda z,n: 1/4*(1-z)*(1-n)*(-1-z-n),
             	lambda z,n: 1/4*(1+z)*(1-n)*(-1+z-n),

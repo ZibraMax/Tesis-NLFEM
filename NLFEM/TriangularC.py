@@ -2,6 +2,8 @@ from .integradorTriangular import *
 class TriangularC(integradorTriangular):
     def __init__(this,coords,gdl=None,gauss=4):
         if len(coords) == 6:
+            this.ZNatural = [0,1,0,0.5,0.5,0]
+            this.NNatural = [0,0,1,0,0.5,0.5]
             this.psi = np.array([lambda z,n: 2*(z+n-1)*(z+n-1/2),
                                  lambda z,n: 2*z*(z-1/2),
                                  lambda z,n: 2*n*(n-1/2),

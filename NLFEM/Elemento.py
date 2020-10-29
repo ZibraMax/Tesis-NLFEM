@@ -5,6 +5,8 @@ from mpl_toolkits import mplot3d
 from matplotlib import tri
 import matplotlib as mpl
 from matplotlib.lines import Line2D
+import matplotlib.path as mpltPath
+
 
 mpl.style.use('default')
 
@@ -132,7 +134,26 @@ class Elemento:
             ax.set_zlabel('u')
             ax.set_title('Solucion interpolada en el elemento')
         return x, y, u
+    def estaDentro(this,x,y):
+        path = mpltPath.Path(this.coords)
+        inside2 = path.contains_points([[x,y]])
+        return inside2[0]
 
+    def darSolucionXY(this, Ue, x, y, n=100):
+        this.U = lambda z, n: Ue.T[0] @ this.psis(z, n)
+        zeta,eta = this.mappingInverso(x, y, n).reshape(1,2)[0].tolist()
+        return this.U(zeta,eta)
+
+    def mappingInverso(this,x,y,n=100,verbose=False):
+        zeta = np.array([[0.0],[0.0]])
+        for i in range(n):
+            if verbose:
+                print(zeta)
+            xi = x - this.Tx(zeta[0][0],zeta[1][0])
+            yi = y - this.Ty(zeta[0][0],zeta[1][0])
+            J = this._J(zeta[0][0],zeta[1][0])
+            zeta += J@np.array([[xi[0]],[yi[0]]])
+        return zeta
     def _darSolucion(this, U, graficar=False):
         X = np.array(this.coords)[:, 0].tolist()
         X.append(this.coords[0][0])

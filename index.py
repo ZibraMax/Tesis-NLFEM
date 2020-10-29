@@ -3,12 +3,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from NLFEM.Mesh import Rect
 import os
+
+import copy
+
 MATRICES_DESDE = 'C++'
 RUTA_M = ''
 if MATRICES_DESDE == 'FORTRAN':
 	RUTA_M = 'NLFEM_FORTRAN'
 elif MATRICES_DESDE == 'C++':
-	RUTA_M = 'NLFEM_C++/NLFEM/MATRICES'
+	RUTA_M = 'NLFEM_C++/NLFEM l 0.1/MATRICES'
 else:
 	print('Arturo por favor deja de jugar')
 def postProcesoX(this, U):
@@ -26,6 +29,19 @@ def postProcesoX(this, U):
         y.append(this.Ty(z, n)[0])
         u.append(this.U(z, n)[0])
     return x, y, u
+
+def postProcesoXNodos(this, U):
+    this.Ue = U[np.ix_(this.gdl)]
+    this._Ue = this.Ue.T[0].tolist()
+    this._Ue.append(this.Ue[0][0])
+    Z = this.ZNatural
+    N = this.NNatural
+    u = []
+    this.U = lambda z, n: grad(this, z, n)[0]
+    for z, n in zip(Z, N):
+        u.append(this.U(z, n)[0])
+    return np.array(u).reshape([len(Z),1])
+
 def postProcesoY(this, U):
     this.Ue = U[np.ix_(this.gdl)]
     this._Ue = this.Ue.T[0].tolist()
@@ -103,6 +119,11 @@ def defUnitariaY(this,figsize):
     ax.set_zlabel(r'$\varepsilon x$')
     ax.set_title(r'$\frac{\partial U}{\partial Y}$')
 
+def darDeformacionXY(this, U, x, y, n=100):
+    this.Ue = U[np.ix_(this.gdl)]
+    this.U = lambda z, n: this.Ue.T[0] @ this.psis(z, n)
+    zeta,eta = this.mappingInverso(x, y, n).reshape(1,2)[0].tolist()
+    return this.U(zeta,eta)
 
 PATH = os.getcwd()
 nombre = "\\NLFEM\\Mesh\\input.txt"
@@ -168,6 +189,87 @@ Objeto_FEM.definirCondicionesDeBorde(Objeto_FEM.geometria.cbe)
 Objeto_FEM.ensamblar()
 Objeto_FEM.condicionesFrontera(Objeto_FEM.cbe,Objeto_FEM.cbn)
 Objeto_FEM.solucionarSistemaEcuaciones()
-[XNoLocal, YNoLocal, ZNoLocal] = defUnitariaX(Objeto_FEM,[10,10])
-plt.savefig('deformacionsX.svg')
-plt.show()
+
+Objeto_FEMLOCAL = copy.deepcopy(Objeto_FEM)
+Objeto_FEMLOCAL.z1 = 1
+Objeto_FEMLOCAL.K = np.zeros([Objeto_FEMLOCAL.n,Objeto_FEMLOCAL.n])
+Objeto_FEMLOCAL.F = np.zeros([Objeto_FEMLOCAL.n,1])
+Objeto_FEMLOCAL.Q = np.zeros([Objeto_FEMLOCAL.n,1])
+Objeto_FEMLOCAL.U = np.zeros([Objeto_FEMLOCAL.n,1])
+Objeto_FEMLOCAL.S = np.zeros([Objeto_FEMLOCAL.n,1])
+Objeto_FEMLOCAL.definirCondicionesDeBorde(Objeto_FEMLOCAL.geometria.cbe)
+Objeto_FEMLOCAL.ensamblar()
+Objeto_FEMLOCAL.condicionesFrontera(Objeto_FEMLOCAL.cbe,Objeto_FEMLOCAL.cbn)
+Objeto_FEMLOCAL.solucionarSistemaEcuaciones()
+
+#[XNoLocal, YNoLocal, ZNoLocal] = defUnitariaX(Objeto_FEM,[10,10])
+#plt.savefig('deformacionsX.svg')
+#plt.show().
+
+def perfilX(x,yi=0.00016,yf=0.0004):
+    _Y = np.linspace(0,5,100).tolist()
+    Z = []
+    Y = []
+    Zlocal = []
+    for y in _Y:
+        for i in range(len(Objeto_FEM.elementos)):
+            e = Objeto_FEM.elementos[i]
+            elocal = Objeto_FEMLOCAL.elementos[i]
+            if e.estaDentro(x,y):
+                U = postProcesoXNodos(e,Objeto_FEM.U)
+                Y.append(y)
+                Z.append(e.darSolucionXY(U, x, y, n=100))
+                U = postProcesoXNodos(elocal,Objeto_FEMLOCAL.U)
+                Zlocal.append(elocal.darSolucionXY(U, x, y, n=100))
+                break
+    plt.plot(Y,Z)
+    plt.plot(Y,Zlocal)
+
+    plt.xlim(0, 5)
+    plt.ylim(yi, yf)
+
+    plt.grid()
+    plt.title('Perfil a x='+format(x))
+    plt.xlabel('y')
+    plt.ylabel(r'$\frac{\partial U}{\partial x}=\varepsilon_x$')
+    plt.legend(['No Local','Local'])
+    plt.savefig('deformacionesXEnX'+format(x)+'.svg')
+    plt.show()
+def perfilY(y,yi=0.00016,yf=0.0004):
+    _X = np.linspace(0,5,100).tolist()
+    Z = []
+    X = []
+    Zlocal = []
+    for x in _X:
+        for i in range(len(Objeto_FEM.elementos)):
+            e = Objeto_FEM.elementos[i]
+            elocal = Objeto_FEMLOCAL.elementos[i]
+            if e.estaDentro(x,y):
+                U = postProcesoXNodos(e,Objeto_FEM.U)
+                X.append(x)
+                Z.append(e.darSolucionXY(U, x, y, n=100))
+                U = postProcesoXNodos(elocal,Objeto_FEMLOCAL.U)
+                Zlocal.append(elocal.darSolucionXY(U, x, y, n=100))
+                break
+    plt.plot(X,Z)
+    plt.plot(X,Zlocal)
+
+    plt.xlim(0, 5)
+    plt.ylim(yi, yf)
+
+    plt.grid()
+    plt.title('Perfil a y='+format(y))
+    plt.xlabel('x')
+    plt.ylabel(r'$\frac{\partial U}{\partial x}=\varepsilon_x$')
+    plt.legend(['No Local','Local'])
+    plt.savefig('deformacionesXEnY'+format(y)+'.svg')
+    plt.show()
+#Vamos a ver, perfiles:
+
+#Figura 9
+perfilY(0.019)
+perfilY(2.519,0.00018,0.00028)
+
+#Figura 10
+perfilX(0.019)
+perfilX(2.519,0.00018,0.00028)
