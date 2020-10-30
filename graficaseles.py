@@ -200,98 +200,93 @@ Objeto_FEMLOCAL.definirCondicionesDeBorde(Objeto_FEMLOCAL.geometria.cbe)
 Objeto_FEMLOCAL.ensamblar()
 Objeto_FEMLOCAL.condicionesFrontera(Objeto_FEMLOCAL.cbe,Objeto_FEMLOCAL.cbn)
 Objeto_FEMLOCAL.solucionarSistemaEcuaciones()
+x=4.750
+_Y = np.linspace(0,5,100).tolist()
+Z = []
+Y = []
+Zl01 = []
+Zl025 = []
+Zl05 = []
+Zlocal = []
 
-def perfilX(x,yi=0.00016,yf=0.0004):
-    _Y = np.linspace(0,5,100).tolist()
-    Z = []
-    Y = []
-    Zl01 = []
-    Zl025 = []
-    Zl05 = []
-    Zlocal = []
+for y in _Y:
+    for i in range(len(Objeto_FEM.elementos)):
+        el01 = objetosFem[0].elementos[i]
+        el025 = objetosFem[1].elementos[i]
+        el05 = objetosFem[2].elementos[i]
+        elocal = Objeto_FEMLOCAL.elementos[i]
+        if elocal.estaDentro(x,y):
+            Y.append(y)
 
-    for y in _Y:
-        for i in range(len(Objeto_FEM.elementos)):
-            el01 = objetosFem[0].elementos[i]
-            el025 = objetosFem[1].elementos[i]
-            el05 = objetosFem[2].elementos[i]
-            elocal = Objeto_FEMLOCAL.elementos[i]
-            if el01.estaDentro(x,y):
-                Y.append(y)
+            U = postProcesoXNodos(el01,objetosFem[0].U)
+            Zl01.append(el01.darSolucionXY(U, x, y, n=100))
 
-                U = postProcesoXNodos(el01,objetosFem[0].U)
-                Zl01.append(el01.darSolucionXY(U, x, y, n=100))
+            U = postProcesoXNodos(el025,objetosFem[1].U)
+            Zl025.append(el025.darSolucionXY(U, x, y, n=100))
 
-                U = postProcesoXNodos(el025,objetosFem[1].U)
-                Zl025.append(el025.darSolucionXY(U, x, y, n=100))
+            U = postProcesoXNodos(el05,objetosFem[2].U)
+            Zl05.append(el05.darSolucionXY(U, x, y, n=100))
 
-                U = postProcesoXNodos(el05,objetosFem[2].U)
-                Zl05.append(el05.darSolucionXY(U, x, y, n=100))
+            U = postProcesoXNodos(elocal,Objeto_FEMLOCAL.U)
+            Zlocal.append(elocal.darSolucionXY(U, x, y, n=100))
+            break
+plt.plot(Y,Zl01)
+plt.plot(Y,Zl025)
+plt.plot(Y,Zl05)
+plt.plot(Y,Zlocal)
+print(Y)
+plt.ylim(0.0002, 0.00022)
 
-                U = postProcesoXNodos(elocal,Objeto_FEMLOCAL.U)
-                Zlocal.append(elocal.darSolucionXY(U, x, y, n=100))
-                break
-    plt.plot(Y,Zl01)
-    plt.plot(Y,Zl025)
-    plt.plot(Y,Zl05)
-    plt.plot(Y,Zlocal)
-    print(Y)
-
-    plt.grid()
-    plt.title('Perfil a x='+format(x))
-    plt.xlabel('y')
-    plt.ylabel(r'$\frac{\partial U}{\partial x}=\varepsilon_x$')
-    plt.legend(['No Local, l=0.1','No Local, l=0.25','No Local, l=0.5','Local'])
-    plt.savefig('deformacionesXvariandolEnX'+format(x)+'.svg')
-    plt.show()
-
-def perfilY(y,yi=0.00016,yf=0.0004):
-    _X = np.linspace(0,5,100).tolist()
-    Z = []
-    X = []
-    Zl01 = []
-    Zl025 = []
-    Zl05 = []
-    Zlocal = []
-
-    for x in _X:
-        for i in range(len(Objeto_FEM.elementos)):
-            el01 = objetosFem[0].elementos[i]
-            el025 = objetosFem[1].elementos[i]
-            el05 = objetosFem[2].elementos[i]
-            elocal = Objeto_FEMLOCAL.elementos[i]
-            if el01.estaDentro(x,y):
-                X.append(x)
-
-                U = postProcesoXNodos(el01,objetosFem[0].U)
-                Zl01.append(el01.darSolucionXY(U, x, y, n=100))
-
-                U = postProcesoXNodos(el025,objetosFem[1].U)
-                Zl025.append(el025.darSolucionXY(U, x, y, n=100))
-
-                U = postProcesoXNodos(el05,objetosFem[2].U)
-                Zl05.append(el05.darSolucionXY(U, x, y, n=100))
-
-                U = postProcesoXNodos(elocal,Objeto_FEMLOCAL.U)
-                Zlocal.append(elocal.darSolucionXY(U, x, y, n=100))
-                break
-    plt.plot(X,Zl01)
-    plt.plot(X,Zl025)
-    plt.plot(X,Zl05)
-    plt.plot(X,Zlocal)
+plt.grid()
+plt.title('Perfil a x='+format(x))
+plt.xlabel('y')
+plt.ylabel(r'$\frac{\partial U}{\partial x}=\varepsilon_x$')
+plt.legend(['No Local, l=0.1','No Local, l=0.25','No Local, l=0.5','Local'])
+plt.savefig('deformacionesXvariandolEnX'+format(x)+'.svg')
+plt.show()
 
 
-    plt.grid()
-    plt.title('Perfil a y='+format(x))
-    plt.xlabel('x')
-    plt.ylabel(r'$\frac{\partial U}{\partial x}=\varepsilon_x$')
-    plt.legend(['No Local, l=0.1','No Local, l=0.25','No Local, l=0.5','Local'])
-    plt.savefig('deformacionesXvariandolEnX'+format(x)+'.svg')
-    plt.show()
-#Vamos a ver, perfiles:
+y = 2.519
+_X = np.linspace(0,5,100).tolist()
+Z = []
+X = []
+Zl01 = []
+Zl025 = []
+Zl05 = []
+Zlocal = []
 
-#Figura 9
-perfilY(2.519,0.00018,0.00028)
+for x in _X:
+    for i in range(len(Objeto_FEM.elementos)):
+        el01 = objetosFem[0].elementos[i]
+        el025 = objetosFem[1].elementos[i]
+        el05 = objetosFem[2].elementos[i]
+        elocal = Objeto_FEMLOCAL.elementos[i]
+        if el01.estaDentro(x,y):
+            X.append(x)
 
-#Figura 10
-perfilX(4.75)
+            U = postProcesoXNodos(el01,objetosFem[0].U)
+            Zl01.append(el01.darSolucionXY(U, x, y, n=100))
+
+            U = postProcesoXNodos(el025,objetosFem[1].U)
+            Zl025.append(el025.darSolucionXY(U, x, y, n=100))
+
+            U = postProcesoXNodos(el05,objetosFem[2].U)
+            Zl05.append(el05.darSolucionXY(U, x, y, n=100))
+
+            U = postProcesoXNodos(elocal,Objeto_FEMLOCAL.U)
+            Zlocal.append(elocal.darSolucionXY(U, x, y, n=100))
+            break
+plt.plot(X,Zl01)
+plt.plot(X,Zl025)
+plt.plot(X,Zl05)
+plt.plot(X,Zlocal)
+plt.ylim(0.00018, 0.00028)
+
+
+plt.grid()
+plt.title('Perfil a y='+format(y))
+plt.xlabel('x')
+plt.ylabel(r'$\frac{\partial U}{\partial x}=\varepsilon_x$')
+plt.legend(['No Local, l=0.1','No Local, l=0.25','No Local, l=0.5','Local'])
+plt.savefig('deformacionesXvariandolEnY'+format(y)+'.svg')
+plt.show()

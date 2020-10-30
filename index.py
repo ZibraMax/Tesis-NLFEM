@@ -233,7 +233,7 @@ def perfilX(x,yi=0.00016,yf=0.0004):
     plt.xlabel('y')
     plt.ylabel(r'$\frac{\partial U}{\partial x}=\varepsilon_x$')
     plt.legend(['No Local','Local'])
-    plt.savefig('deformacionesXEnX'+format(x)+'.svg')
+    plt.savefig('deformacionesXEnX'+format(x)+'.png',transparent=True)
     plt.show()
 def perfilY(y,yi=0.00016,yf=0.0004):
     _X = np.linspace(0,5,100).tolist()
@@ -262,14 +262,14 @@ def perfilY(y,yi=0.00016,yf=0.0004):
     plt.xlabel('x')
     plt.ylabel(r'$\frac{\partial U}{\partial x}=\varepsilon_x$')
     plt.legend(['No Local','Local'])
-    plt.savefig('deformacionesXEnY'+format(y)+'.svg')
+    plt.savefig('deformacionesXEnY'+format(y)+'.png',transparent=True)
     plt.show()
 #Vamos a ver, perfiles:
 
 #Figura 9
-perfilY(0.019)
+perfilY(0.019,0.00016,0.0004)
 perfilY(2.519,0.00018,0.00028)
 
 #Figura 10
-perfilX(0.019)
-perfilX(2.519,0.00018,0.00028)
+perfilX(0.019,0.00016,0.0004)
+perfilX(2.519,0.00016,0.0004)
