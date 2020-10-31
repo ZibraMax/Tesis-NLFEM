@@ -168,12 +168,13 @@ for i,e in enumerate(Objeto_FEM.elementos):
     e.determinarMatrices(K,F,Q)
     knls = []
     j=0
+    KNLS = np.loadtxt(RUTA_M+'/Elemento'+format(i+1)+'/KNLS.csv',delimiter=',')
     for _ in e.elementosnl:
+        KNL = KNLS[j].reshape([16,16]).T
         j+=1
-        KNL = np.loadtxt(RUTA_M+'/Elemento'+format(i+1)+'/KNL'+format(i+1)+'_'+format(j)+'.csv',delimiter=',').reshape([16,16])
         knls.append(KNL)
-        e.KNLS = knls
-    print(i)
+    e.KNLS = knls
+    print('Cargando matrices del elemento ' + format(i))
 PUNTOS = [-np.sqrt(3.0/5.0),0,np.sqrt(3.0/5.0)]
 for this in Objeto_FEM.elementos:
     this._dominioNaturalZ = PUNTOS

@@ -6,4 +6,5 @@ NLFEM_C++/NLFEM/Resultados.zip
 .ipynb_checkpoints
 MatricesElementos/
 *.svg
+*.png
 *.csv

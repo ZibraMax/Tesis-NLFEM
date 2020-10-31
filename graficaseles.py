@@ -164,13 +164,14 @@ for i in range(len(eles)):
         F = np.zeros([2 * n, 1])
         e.determinarMatrices(K,F,Q)
         knls = []
-        j=0
         print('Elemento', i, 'Problema ', len(objetosFem))
+        j=0
+        KNLS = np.loadtxt(RUTA_M+'/Elemento'+format(i+1)+'/KNLS.csv',delimiter=',')
         for _ in e.elementosnl:
+            KNL = KNLS[j].reshape([16,16]).T
             j+=1
-            KNL = np.loadtxt(RUTA_M+'/Elemento'+format(i+1)+'/KNL'+format(i+1)+'_'+format(j)+'.csv',delimiter=',').reshape([16,16])
             knls.append(KNL)
-            e.KNLS = knls
+        e.KNLS = knls
     PUNTOS = [-np.sqrt(3.0/5.0),0,np.sqrt(3.0/5.0)]
     for this in Objeto_FEM.elementos:
         this._dominioNaturalZ = PUNTOS
