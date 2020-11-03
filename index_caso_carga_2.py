@@ -222,7 +222,7 @@ Objeto_FEMLOCAL.solucionarSistemaEcuaciones()
 # plt.show()
 
 def perfilX(x,yi=0.00016,yf=0.0004):
-    _Y = np.linspace(0,5,1000).tolist()
+    _Y = np.linspace(0,5,100).tolist()
     Z = []
     Y = []
     Zlocal = []
@@ -251,7 +251,7 @@ def perfilX(x,yi=0.00016,yf=0.0004):
     plt.savefig('Caso2deformacionesXEnX'+format(x)+'.png',transparent=True)
     plt.show()
 def perfilY(y,yi=0.00016,yf=0.0004):
-    _X = np.linspace(0,5,1000).tolist()
+    _X = np.linspace(0,5,100).tolist()
     Z = []
     X = []
     Zlocal = []

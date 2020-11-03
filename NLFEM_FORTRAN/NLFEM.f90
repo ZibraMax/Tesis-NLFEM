@@ -370,6 +370,7 @@ program NLFEM
     integer :: j
     integer :: k
     integer :: m
+    integer :: kkkkk
     character(len=255) :: X1
     character(len=255) :: X2
 
@@ -434,7 +435,8 @@ program NLFEM
         read(format,*) ELEMENTOS(i)%nolocales
     enddo
     close(10)
-
+    call execute_command_line ('mkdir MATRICES')
+    kkkkk = chdir('MATRICES')
     do i=1,NUMERO_ELEMENTOS
         call cpu_time(start)
         write(X1,*) i
@@ -443,13 +445,12 @@ program NLFEM
         open(10,file='Elemento'//trim(adjustl(X1))//'/KL_'//trim(adjustl(X1))//'.csv')
         write (10, "(*(G0,:,','))") MATRIZ_L
         close(10)
+        open(11,file='Elemento'//trim(adjustl(X1))//'/KNLS'//'.csv')
         do j=2,ELEMENTOS(i)%nolocales(1)+1
-            write(x2,*) (j-1)
             call ELEMENTOS(i)%MNL(ELEMENTOS(ELEMENTOS(i)%nolocales(j)),MATRIZ_NKLNM,C11,C12,C66)
-            open(10,file='Elemento'//trim(adjustl(X1))//'/KNL'//trim(adjustl(X1))//'_'//trim(adjustl(X2))//'.csv')
-            write (10, "(*(G0,:,','))") MATRIZ_NKLNM
-            close(10)
+            write (11, "(*(G0,:,','))") MATRIZ_NKLNM
         enddo
+        close(11)
         print *, "------------------------------------------------------------"
         call cpu_time(finish)
         print *, "Elemento ",i, " - Tiempo: ",(finish-start)*1000, " ms"

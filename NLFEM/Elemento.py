@@ -135,7 +135,7 @@ class Elemento:
             ax.set_title('Solucion interpolada en el elemento')
         return x, y, u
     def estaDentro(this,x,y):
-        path = mpltPath.Path(this.coords)
+        path = mpltPath.Path(this._coords)
         inside2 = path.contains_points([[x,y]])
         return inside2[0]
 

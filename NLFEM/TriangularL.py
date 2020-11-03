@@ -10,3 +10,4 @@ class TriangularL(integradorTriangular):
         else:
             raise Exception('Error: Se esta intentando crear un elemento triangualar que no tiene 3 coordenadas. '+'Recuerde que se necesitan de 3 corrdenadas en orden contrario de las manecillas del reloj '+'sin repetir la primera coordenada')
         super().__init__(coords=coords,gdl=gdl,gauss=gauss)
+        this._coords = coords

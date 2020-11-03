@@ -10,3 +10,4 @@ class CuadrilateroL(integradorRectangular):
         else:
             raise Exception('Error: Se esta intentando crear un elemento que no tiene 4 coordenadas. '+'Recuerde que se necesitan de 4 corrdenadas en sentido contrario de las manecillas del reloj '+'sin repetir la primera coordenada')
         super().__init__(coords=coords,gdl=gdl,gauss=gauss)
+        this._coords = coords

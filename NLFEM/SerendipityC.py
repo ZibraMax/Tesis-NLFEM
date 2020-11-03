@@ -37,3 +37,4 @@ class SerendipityC(integradorRectangular):
         else:
             raise Exception('Error: Se esta intentando crear un elemento que no tiene 8 coordenadas. '+'Recuerde que se necesitan de 8 corrdenadas en sentido contrario de las manecillas del reloj '+'sin repetir la primera coordenada')
         super().__init__(coords=coords,gdl=gdl,gauss=gauss)
+        this._coords = [coords[0],coords[1],coords[2],coords[3]]
