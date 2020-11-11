@@ -1,4 +1,61 @@
-// Integraci
+// NLFEM - Integrador
+// Arturo Rodriguez - da.rodriguezh@uniandes.edu.co
+// Basado en "Nonlocal integral elasticity: 2D finite element based solutions" (Pisano, 2009) y en el enmallado de Fernando Ramírez
+// Programa usado SOLAMENTE para integrar.
+
+// Librerias Requeridas:
+// Eigen (paquete de algebra lineal para C++)
+
+
+// Inputs:
+
+/* Argumentos de entrada (por consola separados por espacio): 
+1. Archivo de texto que contenga las siguientes filas:
+	1 fila: Numero de grados de libertad, Numero de elementos
+	... : Coordenadas (2D) de los grados de libertad
+	... : Grados de libertad de cada uno de los elementos
+	... : Elementos no locales por elemento
+2. Numero de puntos de gauss para integrar (int)
+3. Modulo de Young (double)
+4. Coeficiente de Poisson (double)
+5. grosor (double)
+6. longitud interna (parámetro no-local) (double)
+*/
+
+// Outputs:
+
+/* El programa generará (y sobreescribirá de ser necesario) los resultados en la siguiente estructura
+
+	index.cpp
+	Serendipity.h
+	MATRICES
+	--Elementoi
+	----KL_i.csv
+	----KNLS.csv
+
+	El archivo KL_i.csv contiene la matriz de rigidez local del elemento i, esta se guarda en forma de matriz (16x16)
+	El archivo KNLS.csv contiene M filas donde cada j-ésima fila corresponde a la matriz de rigidez no local
+	del elemento i con el elemento j. Esta matriz se guarda por columnas. Es decir, la posicion 18 corresponde a la fila 2 columna 2 de la matriz.
+	Para poder cargar cada una de las matrices no locales (en python) se puede usar el método reshape de numpy y
+	posteriormente hallar la transpuesta, en numpy asi: (elemento i) -> KNLS[j] = np.loadtxt('MATRICES/KNLS.csv')[j].reshape([16,16]).T
+*/
+
+/*
+	Los argumentos de entrada permiten llamar al programa desde python, lo cual puede ser util.
+*/
+
+/*
+	En ningun punto de este programa se usan variables especificamente relacionadas con el numero de nodos por elemento
+	Esto hace que usando otras clases (como Serendipity.h) se pueden implementar elementos con 4 nodos por elemento,
+	asi como elementos triangulares de 3 y 6 nodos.
+
+	En algún punto se tendrá que definir la interface Elemento con el polimorfismo para cada una de estas clases
+
+
+	Adicionalmente se tiene un contador de tiempo asociado al tiempo restante de integración.
+	Este tiempo restante es solamente confiable cuando se complenta un 20% de los elementos,
+	esto se debe a que los primeros elementos del enmallado generalmente tienen una menor cantidad de elementos no locales
+*/
 
 #include <iostream>
 #include <fstream>
@@ -12,29 +69,12 @@
 #include <chrono> 
 #include <iomanip>
 #include <limits>
-
+#include "legendre.h"
 
 
 using namespace std::chrono;
 using namespace Eigen;
 using namespace std;
-
-double t = 0.5;
-double E = 2.1*pow(10.0,6);
-double v = 0.2;
-
-double l = 0.1;
-double C11 = E/(1.0-v*v);
-double C12 = v*E/(1.0-v*v);
-double C66 = E/2/(1.0+v);
-const double PI_calc  = 3.141592653589793238463;
-double L0 = (1.0)/(2*PI_calc*l*l*t);
-
-
-
-vector<double> PUNTOS{-sqrt(3.0/5.0),0,sqrt(3.0/5.0)};
-int NG = PUNTOS.size();
-vector<double> PESOS{5.0/9.0,8.0/9.0,5.0/9.0};
 
 vector<string> split(const string& str, const string& delim)
 {
@@ -52,7 +92,7 @@ vector<string> split(const string& str, const string& delim)
 	return tokens;
 }
 
-vector<Serendipity> leerTexto(string filename) {
+vector<Serendipity> leerTexto(string filename,double t,vector<double> PUNTOS, vector<double> PESOS) {
 	vector<Serendipity> ELEMENTOS;
 	string line;
 	ifstream myfile (filename);
@@ -61,7 +101,6 @@ vector<Serendipity> leerTexto(string filename) {
 		vector<string> linea = split(line," ");
 		int NUMERO_GDL = stoi(linea[0]);
 		int NUMERO_ELEMENTOS = stoi(linea[1]);
-		int NUMERO_NODOS_ELEMENTO = stoi(linea[2]);
 		double GDL[NUMERO_GDL][2];
 		vector<vector<int>> elementos;
 		vector<int> ENL[NUMERO_ELEMENTOS];
@@ -75,7 +114,7 @@ vector<Serendipity> leerTexto(string filename) {
 			getline(myfile,line);
 			vector<string> linea = split(line," ");
 			vector<int> elemento;
-			for (int j = 0; j < NUMERO_NODOS_ELEMENTO; ++j) {
+			for (int j = 0; j < linea.size(); ++j) {
 				elemento.push_back(stoi(linea[j])-1);
 			}
 			elementos.push_back(elemento);
@@ -95,24 +134,49 @@ vector<Serendipity> leerTexto(string filename) {
 	else cout << "Unable to open file";
 	return ELEMENTOS;
 }
-void writeToCSVfile(string name, MatrixXd matrix) {
-	cout.precision(15);
-	const static IOFormat CSVFormat(FullPrecision, DontAlignCols, ", ", "\n");
-	ofstream Archivo(name.c_str());
-	Archivo << matrix.format(CSVFormat);
-	Archivo.close();
-}
-double atenuacion(double x,double y,double xnl,double ynl) {
+
+//Función de atenuación que se usará
+double atenuacion(double x,double y,double xnl,double ynl,double L0,double l) {
 	double distancia = sqrt(pow((x-xnl),2)+pow((y-ynl),2));
 	return L0*exp(-distancia/l);
 }
-int main () {
-	cout<<"Implementacion funcional"<<endl;
+
+int main (int argc, char const *argv[]) {
+
+	cout<<"NLFEM-C++"<<endl;
+	cout << "================================" <<endl;
+	int NG = stoi(argv[2]);
+	cout << "Encontrando puntos y pesos de Gauss" <<endl;
+	vector<double> PUNTOS = darPuntos(NG);
+	vector<double> PESOS = darPesos(NG);
+	cout << "Puntos y pesos encontrados (" << NG << "):" <<endl;
+	for (int i = 0; i < NG; ++i) {
+		cout << "Z"<<i<<"=" << PUNTOS[i] << ", W"<<i<<"=" << PESOS[i] << endl;
+	}
+	cout << "--------------------------------" <<endl;
+	cout << "Calculando con los siguientes parámetros:" <<endl;
+	double E = stold(argv[3]);
+	double v = stold(argv[4]);
+	double t = stold(argv[5]);
+	double l = stold(argv[6]);
+	cout<< "E=" << E << ","<< "v="<< v << ","<< "t=" << t << "," << "l=" << l << endl;
+	cout << "--------------------------------" <<endl;
+	cout << "Archivo de enmallado: " << argv[1] <<endl;
+	double C11 = E/(1.0-v*v);
+	double C12 = v*E/(1.0-v*v);
+	double C66 = E/2/(1.0+v);
+	const double PI_calc  = 3.141592653589793238463;
+	double L0 = (1.0)/(2*PI_calc*l*l*t);
+
 	vector<Serendipity> ELEMENTOS;
-	ELEMENTOS = leerTexto("input.txt");
+	cout << "Leyendo archivo" << endl;
+	ELEMENTOS = leerTexto(argv[1],t,PUNTOS,PESOS);
+	cout << "--------------------------------" <<endl;
+	cout << "Comenzando la integración" << endl;
 	int NUMERO_ELEMENTOS = ELEMENTOS.size();
 	int conti = 0;
-	string Ruta = "./MATRICES"; 
+	string rutaParcial = argv[7];
+	string Ruta = "./"+rutaParcial; 
 	int n = Ruta.length(); 
 	char RutaChar[n + 1]; 
 	strcpy(RutaChar, Ruta.c_str());
@@ -123,12 +187,12 @@ int main () {
 		auto start = high_resolution_clock::now();
 		int contj = 0;
 		conti++;
-		string Ruta = "./MATRICES/Elemento"+to_string(conti); 
+		string Ruta = "./"+rutaParcial+"/Elemento"+to_string(conti); 
 		int n = Ruta.length(); 
 		char RutaChar[n + 1]; 
 		strcpy(RutaChar, Ruta.c_str());
 		mkdir(RutaChar);
-		e.matrizLocal(C11,C12,C66,conti);
+		e.matrizLocal(C11,C12,C66,conti,"./"+rutaParcial);
 		vector<vector<double>> matricesNoLocales;
 		for (int indiceNoLocal: e.nolocales) {
 			contj++;
@@ -179,7 +243,7 @@ int main () {
 
 									double dfdxnl_j = dznl_j * jacobiano_nl[0][0] + dnnl_j* jacobiano_nl[0][1];
 									double dfdynl_j = dznl_j * jacobiano_nl[1][0] + dnnl_j* jacobiano_nl[1][1];
-									double AZN = atenuacion(x,y,xnl,ynl);
+									double AZN = atenuacion(x,y,xnl,ynl,L0,l);
 									KKUU += t * t * AZN * (C11 * dfdx_i * dfdxnl_j + C66 * dfdy_i * dfdynl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
 									KKUV += t * t * AZN * (C12 * dfdx_i * dfdynl_j + C66 * dfdy_i * dfdxnl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
 									KKVU += t * t * AZN * (C12 * dfdy_i * dfdxnl_j + C66 * dfdx_i * dfdynl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
@@ -202,7 +266,7 @@ int main () {
 			VectorXd::Map(&v2[0], v1.size()) = v1;
 			matricesNoLocales.push_back(v2);
 		}
-		ofstream myfile("./MATRICES/Elemento"+to_string(conti)+"/KNLS.csv");
+		ofstream myfile("./"+rutaParcial+"/Elemento"+to_string(conti)+"/KNLS.csv");
 		myfile << defaultfloat << setprecision(numeric_limits<double>::digits10);
 		for (int i = 0; i < matricesNoLocales.size(); ++i) {
 			for (int j = 0; j < matricesNoLocales[i].size(); ++j) {

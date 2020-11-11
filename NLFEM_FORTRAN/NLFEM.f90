@@ -365,6 +365,7 @@ program NLFEM
     integer :: gdl_e(8)
     integer :: longitudLinea
     real :: start, finish
+    real :: tiempo_transcurrido, tiempo_promedio
 
     integer :: i
     integer :: j
@@ -374,7 +375,7 @@ program NLFEM
     character(len=255) :: X1
     character(len=255) :: X2
 
-    character(len=255) format
+    character(len=9999) format
     real :: MATRIZ_NKLNM(16,16)
     real :: MATRIZ_L(16,16)
 
@@ -437,6 +438,7 @@ program NLFEM
     close(10)
     call execute_command_line ('mkdir MATRICES')
     kkkkk = chdir('MATRICES')
+    tiempo_transcurrido = 0
     do i=1,NUMERO_ELEMENTOS
         call cpu_time(start)
         write(X1,*) i
@@ -453,6 +455,8 @@ program NLFEM
         close(11)
         print *, "------------------------------------------------------------"
         call cpu_time(finish)
-        print *, "Elemento ",i, " - Tiempo: ",(finish-start)*1000, " ms"
+        tiempo_transcurrido = tiempo_transcurrido + (finish-start)
+        tiempo_promedio = tiempo_transcurrido/i
+        print *, "Elemento ",i, " - Tiempo: ",(finish-start)*1000, " ms - ", "ETA [min]: ", tiempo_promedio/60*(NUMERO_ELEMENTOS-i)
     enddo
 end program NLFEM

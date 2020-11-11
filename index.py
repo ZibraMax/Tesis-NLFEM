@@ -125,11 +125,6 @@ def darDeformacionXY(this, U, x, y, n=100):
     zeta,eta = this.mappingInverso(x, y, n).reshape(1,2)[0].tolist()
     return this.U(zeta,eta)
 
-PATH = os.getcwd()
-nombre = "\\NLFEM\\Mesh\\input.txt"
-GEOMETRIA = Rect.Rect(PATH+nombre,10,10)
-GEOMETRIA.segmentos = [[0,60],[60,2820],[2820,2760],[2760,0]]
-GEOMETRIA.cbe = []
 
 def generarCBdesdeBordeX(this, borde, valor=0):
     cb = []
@@ -156,10 +151,20 @@ a = 5
 E = 2.1*10**6
 V = 0.2
 u = 0.001
+
+NEX = 50
+NEY = 50
+
+PATH = os.getcwd()
+nombre = "\\NLFEM\\Mesh\\input.txt"
+GEOMETRIA = Rect.Rect(PATH+nombre,NEX,NEY)
+GEOMETRIA.segmentos = [[0, 100], [100, 7700], [7700, 7600], [7600, 0]]
+GEOMETRIA.cbe = []
 Objeto_FEM = NLFEM.NoLocal(GEOMETRIA)
 GEOMETRIA.cbe = generarCBdesdeBorde(GEOMETRIA,3,[0,0])+generarCBdesdeBordeX(GEOMETRIA,1,u)
 Objeto_FEM.definirCondicionesDeBorde(GEOMETRIA.cbe)
 Objeto_FEM.generarElementos()
+print(GEOMETRIA.segmentos)
 for i,e in enumerate(Objeto_FEM.elementos):
     n = len(e.coords)
     K = np.loadtxt(RUTA_M+'/Elemento'+format(i+1)+'/KL_'+format(i+1)+'.csv',delimiter=',').reshape([16,16])
@@ -203,9 +208,9 @@ Objeto_FEMLOCAL.ensamblar()
 Objeto_FEMLOCAL.condicionesFrontera(Objeto_FEMLOCAL.cbe,Objeto_FEMLOCAL.cbn)
 Objeto_FEMLOCAL.solucionarSistemaEcuaciones()
 
-#[XNoLocal, YNoLocal, ZNoLocal] = defUnitariaX(Objeto_FEM,[10,10])
+[XNoLocal, YNoLocal, ZNoLocal] = defUnitariaX(Objeto_FEM,[10,10])
 #plt.savefig('deformacionsX.svg')
-#plt.show().
+plt.show()
 
 def perfilX(x,yi=0.00016,yf=0.0004):
     _Y = np.linspace(0,5,100).tolist()

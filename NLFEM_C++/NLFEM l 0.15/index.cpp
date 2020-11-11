@@ -23,7 +23,7 @@ double t = 0.5;
 double E = 2.1*pow(10.0,6);
 double v = 0.2;
 
-double l = 0.15;
+double l = 0.1;
 double C11 = E/(1.0-v*v);
 double C12 = v*E/(1.0-v*v);
 double C66 = E/2/(1.0+v);

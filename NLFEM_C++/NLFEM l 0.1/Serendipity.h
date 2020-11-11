@@ -33,34 +33,34 @@ class Serendipity {
 
 		double t;
 		vector<function<double(double,double)>> psi{
-		[](double z, double n){return (double) 1/4*(1-z)*(1-n)*(-1-z-n);},
-		[](double z, double n){return (double) 1/4*(1+z)*(1-n)*(-1+z-n);},
-		[](double z, double n){return (double) 1/4*(1+z)*(1+n)*(-1+z+n);},
-		[](double z, double n){return (double) 1/4*(1-z)*(1+n)*(-1-z+n);},
-		[](double z, double n){return (double) 1/2*(1-z*z)*(1-n);},
-		[](double z, double n){return (double) 1/2*(1+z)*(1-n*n);},
-		[](double z, double n){return (double) 1/2*(1-z*z)*(1+n);},
-		[](double z, double n){return (double) 1/2*(1-z)*(1-n*n);}};
+		[](double z, double n){return 1.0/4.0*(1.0-z)*(1.0-n)*(-1.0-z-n);},
+		[](double z, double n){return 1.0/4.0*(1.0+z)*(1.0-n)*(-1.0+z-n);},
+		[](double z, double n){return 1.0/4.0*(1.0+z)*(1.0+n)*(-1.0+z+n);},
+		[](double z, double n){return 1.0/4.0*(1.0-z)*(1.0+n)*(-1.0-z+n);},
+		[](double z, double n){return 1.0/2.0*(1.0-z*z)*(1.0-n);},
+		[](double z, double n){return 1.0/2.0*(1.0+z)*(1.0-n*n);},
+		[](double z, double n){return 1.0/2.0*(1.0-z*z)*(1.0+n);},
+		[](double z, double n){return 1.0/2.0*(1.0-z)*(1.0-n*n);}};
 
 		vector<function<double(double,double)>> dzpsi{
-		[](double z, double n){return (double) -1/4*(n-1)*(2*z+n);},
-		[](double z, double n){return (double) -1/4*(n-1)*(2*z-n);},
-		[](double z, double n){return (double) 1/4*(n+1)*(2*z+n);},
-		[](double z, double n){return (double) 1/4*(n+1)*(2*z-n);},
-		[](double z, double n){return (double) (n-1)*z;},
-		[](double z, double n){return (double) -1/2*(n*n-1);},
-		[](double z, double n){return (double) -(n+1)*z;},
-		[](double z, double n){return (double) 1/2*(n*n-1);}};
+		[](double z, double n){return -1.0/4.0*(n-1.0)*(2.0*z+n);},
+		[](double z, double n){return -1.0/4.0*(n-1.0)*(2.0*z-n);},
+		[](double z, double n){return 1.0/4.0*(n+1.0)*(2.0*z+n);},
+		[](double z, double n){return 1.0/4.0*(n+1.0)*(2.0*z-n);},
+		[](double z, double n){return (n-1.0)*z;},
+		[](double z, double n){return -1.0/2.0*(n*n-1.0);},
+		[](double z, double n){return -(n+1.0)*z;},
+		[](double z, double n){return 1.0/2.0*(n*n-1.0);}};
 
 		vector<function<double(double,double)>> dnpsi{
-		[](double z, double n){return (double) -1/4*(z-1)*(2*n+z);},
-		[](double z, double n){return (double) 1/4*(z+1)*(2*n-z);},
-		[](double z, double n){return (double) 1/4*(z+1)*(2*n+z);},
-		[](double z, double n){return (double) -1/4*(z-1)*(2*n-z);},
-		[](double z, double n){return (double) 1/2*(z*z-1);},
-		[](double z, double n){return (double) -n*(z+1);},
-		[](double z, double n){return (double) -1/2*(z*z-1);},
-		[](double z, double n){return (double) n*(z-1);}};
+		[](double z, double n){return -1.0/4.0*(z-1.0)*(2.0*n+z);},
+		[](double z, double n){return 1.0/4.0*(z+1.0)*(2.0*n-z);},
+		[](double z, double n){return 1.0/4.0*(z+1.0)*(2.0*n+z);},
+		[](double z, double n){return -1.0/4.0*(z-1.0)*(2.0*n-z);},
+		[](double z, double n){return 1.0/2.0*(z*z-1.0);},
+		[](double z, double n){return -n*(z+1.0);},
+		[](double z, double n){return -1.0/2.0*(z*z-1.0);},
+		[](double z, double n){return n*(z-1.0);}};
 
 		Serendipity(vector<int> pgdls, vector<int> pnolocales,double COORDENADAS[][2],vector<double> ppgauss,vector<double> pwgauss,double pt) {
 			PUNTOS = ppgauss;
@@ -100,40 +100,40 @@ class Serendipity {
 		}
 		vector<double> psis(double z, double n) {
 			vector<double> foo{
-				(double) 1/4*(1-z)*(1-n)*(-1-z-n),
-				(double) 1/4*(1+z)*(1-n)*(-1+z-n),
-				(double) 1/4*(1+z)*(1+n)*(-1+z+n),
-				(double) 1/4*(1-z)*(1+n)*(-1-z+n),
-				(double) 1/2*(1-z*z)*(1-n),
-				(double) 1/2*(1+z)*(1-n*n),
-				(double) 1/2*(1-z*z)*(1+n),
-				(double) 1/2*(1-z)*(1-n*n)
+				1.0/4.0*(1.0-z)*(1.0-n)*(-1.0-z-n),
+				1.0/4.0*(1.0+z)*(1.0-n)*(-1.0+z-n),
+				1.0/4.0*(1.0+z)*(1.0+n)*(-1.0+z+n),
+				1.0/4.0*(1.0-z)*(1.0+n)*(-1.0-z+n),
+				1.0/2.0*(1.0-z*z)*(1.0-n),
+				1.0/2.0*(1.0+z)*(1.0-n*n),
+				1.0/2.0*(1.0-z*z)*(1.0+n),
+				1.0/2.0*(1.0-z)*(1.0-n*n)
 				};
 			return foo;
 		}
 		vector<double> dzpsis(double z, double n) {
 			vector<double> foo{
-				(double) -1/4*(n-1)*(2*z+n),
-				(double) -1/4*(n-1)*(2*z-n),
-				(double) 1/4*(n+1)*(2*z+n),
-				(double) 1/4*(n+1)*(2*z-n),
-				(double) (n-1)*z,
-				(double) -1/2*(n*n-1),
-				(double) -(n+1)*z,
-				(double) 1/2*(n*n-1)
+				-1.0/4.0*(n-1.0)*(2.0*z+n),
+				-1.0/4.0*(n-1.0)*(2.0*z-n),
+				1.0/4.0*(n+1.0)*(2.0*z+n),
+				1.0/4.0*(n+1.0)*(2.0*z-n),
+				(n-1.0)*z,
+				-1.0/2.0*(n*n-1.0),
+				-(n+1.0)*z,
+				1.0/2.0*(n*n-1.0)
 				};
 			return foo;
 		}
 		vector<double> dnpsis(double z, double n) {
 			vector<double> foo{
-				(double) -1/4*(z-1)*(2*n+z),
-				(double) 1/4*(z+1)*(2*n-z),
-				(double) 1/4*(z+1)*(2*n+z),
-				(double) -1/4*(z-1)*(2*n-z),
-				(double) 1/2*(z*z-1),
-				(double) -n*(z+1),
-				(double) -1/2*(z*z-1),
-				(double) n*(z-1)
+				-1.0/4.0*(z-1.0)*(2.0*n+z),
+				1.0/4.0*(z+1.0)*(2.0*n-z),
+				1.0/4.0*(z+1.0)*(2.0*n+z),
+				-1.0/4.0*(z-1.0)*(2.0*n-z),
+				1.0/2.0*(z*z-1.0),
+				-n*(z+1.0),
+				-1.0/2.0*(z*z-1.0),
+				n*(z-1.0)
 				};
 			return foo;
 		}
@@ -165,7 +165,7 @@ class Serendipity {
 				cout << endl;
 			}
 		}
-		void matrizLocal(double C11,double C12,double C66,int nelemento) {
+		void matrizLocal(double C11,double C12,double C66,int nelemento,string rutaBase) {
 			int N = gdl.size();
 			MatrixXd KUU(N,N);
 			MatrixXd KUV(N,N);
@@ -215,6 +215,6 @@ class Serendipity {
 			}
 			MatrixXd K(2*N, 2*N);
 			K<<KUU,KUV,KVU,KVV;
-			guardarMatriz("./MATRICES/Elemento"+to_string(nelemento)+"/KL_"+to_string(nelemento)+".csv",K);
+			guardarMatriz(rutaBase+"/Elemento"+to_string(nelemento)+"/KL_"+to_string(nelemento)+".csv",K);
 		}
 };
