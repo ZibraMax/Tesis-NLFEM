@@ -6,14 +6,7 @@ import os
 
 import copy
 
-MATRICES_DESDE = 'C++'
-RUTA_M = ''
-if MATRICES_DESDE == 'FORTRAN':
-	RUTA_M = 'NLFEM_FORTRAN/MATRICES'
-elif MATRICES_DESDE == 'C++':
-	RUTA_M = 'NLFEM_C++/MATRICESCUADRATICO'
-else:
-	print('Arturo por favor deja de jugar')
+RUTA_M = 'MATRICES'
 def postProcesoX(this, U):
     this.Ue = U[np.ix_(this.gdl)]
     this._Ue = this.Ue.T[0].tolist()
@@ -156,7 +149,7 @@ NEX = 30
 NEY = 30
 
 PATH = os.getcwd()
-nombre = "\\NLFEM\\Mesh\\input.txt"
+nombre = "\\input.txt"
 GEOMETRIA = Rect.Rect(PATH+nombre,NEX,NEY)
 GEOMETRIA.segmentos = [[0,60],[60,2820],[2820,2760],[2760,0]]#[[0, 100], [100, 7700], [7700, 7600], [7600, 0]]
 GEOMETRIA.cbe = []
