@@ -11,7 +11,7 @@ RUTA_M = ''
 if MATRICES_DESDE == 'FORTRAN':
 	RUTA_M = 'NLFEM_FORTRAN/MATRICES'
 elif MATRICES_DESDE == 'C++':
-	RUTA_M = 'NLFEM_C++/MATRICESCUADRATICO'
+	RUTA_M = 'NLFEM_C++/MATRICESmodificado'
 else:
 	print('Arturo por favor deja de jugar')
 def postProcesoX(this, U):
@@ -174,8 +174,10 @@ for i,e in enumerate(Objeto_FEM.elementos):
     knls = []
     j=0
     KNLS = np.loadtxt(RUTA_M+'/Elemento'+format(i+1)+'/KNLS.csv',delimiter=',')
-    for _ in e.elementosnl:
+    for enl in e.elementosnl:
         KNL = KNLS[j].reshape([16,16]).T
+        if j==0:
+            print(e.elementosnl,enl,i,KNL)
         j+=1
         knls.append(KNL)
     e.KNLS = knls

@@ -25,6 +25,7 @@
 	1: Función Biexponencial
 	2: Función Cónica (lineal)
 	3: Función campana (Cuadrática)
+	4: Función custom (biexponencial modificada)
 */
 
 // Outputs:
@@ -145,6 +146,10 @@ double atenuacion(double x,double y,double xnl,double ynl,double L0,double l) {
 	double distancia = sqrt(pow((x-xnl),2)+pow((y-ynl),2));
 	return L0*exp(-distancia/l);
 }
+double atenuacion_biexponencial_modificada(double x,double y,double xnl,double ynl,double L0,double l) {
+	double distancia = sqrt(pow((x-xnl),2)+pow((y-ynl),2));
+	return L0*distancia/l*exp(-distancia/l);
+}
 double atenuacion_lineal(double x,double y,double xnl,double ynl,double L0,double LR) {
 	double r = sqrt(pow((x-xnl),2)+pow((y-ynl),2));
 	return (r/LR) > 1 ? 0 : L0*(1-(r/LR));
@@ -178,7 +183,6 @@ int main (int argc, char const *argv[]) {
 	double C12 = v*E/(1.0-v*v);
 	double C66 = E/2/(1.0+v);
 	const double PI_calc  = 3.141592653589793238463;
-	double L0 = (1.0)/(2*PI_calc*l*l*t);
 
 	vector<Serendipity> ELEMENTOS;
 	cout << "Leyendo archivo" << endl;
@@ -257,17 +261,26 @@ int main (int argc, char const *argv[]) {
 									double dfdynl_j = dznl_j * jacobiano_nl[1][0] + dnnl_j* jacobiano_nl[1][1];
 									double AZN = 0;
 									if (stoi(argv[8])==1) {
+										double L0 = 1.0/2/PI_calc/l/l/t;
 										AZN = atenuacion(x,y,xnl,ynl,L0,l);
 									} else if (stoi(argv[8])==2) {
 										double LR =6*l;
-										L0 = 3.0/2.0/PI_calc/LR/LR/t;
+										double L0 = 3.0/2.0/PI_calc/LR/LR/t;
 										AZN = atenuacion_lineal(x,y,xnl,ynl,L0,LR);
 									} else if (stoi(argv[8])==3) {
 										double LR =6*l;
-										L0 = 1.0/PI_calc/LR/LR/t;
+										double L0 = 1.0/PI_calc/LR/LR/t;
 										AZN = atenuacion_cuadratica(x,y,xnl,ynl,L0,LR);
+									} else if (stoi(argv[8])==4) {
+										double L0 = 1.0/4.0/PI_calc/l/l/t;
+										AZN = atenuacion_biexponencial_modificada(x,y,xnl,ynl,L0,l);
 									} else {
 										cout<<"ERROR EN ELECCION DE FUNCION DE ATENUACION";
+									}
+									if (contj==1) {
+										double L0 = 1.0/2/PI_calc/l/l/t;
+										double azn2 = atenuacion(x,y,xnl,ynl,L0,l);
+										cout<<AZN<<","<<azn2<<","<<i_nl<<","<<j_nl<<","<<i<<","<<j<<","<<sqrt(pow((x-xnl),2)+pow((y-ynl),2))<<endl;
 									}
 									KKUU += t * t * AZN * (C11 * dfdx_i * dfdxnl_j + C66 * dfdy_i * dfdynl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
 									KKUV += t * t * AZN * (C12 * dfdx_i * dfdynl_j + C66 * dfdy_i * dfdxnl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
@@ -277,6 +290,7 @@ int main (int argc, char const *argv[]) {
 							}
 						}
 					}
+					cout<<"--------------------------------"<<endl;
 					KUU(gdli,gdlj)=KKUU;
 					KUV(gdli,gdlj)=KKUV;
 					KVU(gdli,gdlj)=KKVU;

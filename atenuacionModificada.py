@@ -20,8 +20,8 @@ f2 = lambda x,y: macauley(f2p,x,y)
 f3 = lambda x,y: macauley(f3p,x,y)
 f4 = lambda x,y: r(x,y)/l*np.exp(-r(x,y)/l)
 
-L0S = np.array([L0,L0_lineal,L0_cuadratico,L0_custom])
-atenuacion = lambda x,y: np.array([f1(x,y),f2(x,y),f3(x,y),f4(x,y)])*L0S
+L0S = np.array([L0_custom])
+atenuacion = lambda x,y: np.array([f4(x,y)])*L0S
 
 psis = lambda z,n: np.array([[1/4*(1-z)*(1-n)*(-1-z-n)],[1/4*(1+z)*(1-n)*(-1+z-n)],[1/4*(1+z)*(1+n)*(-1+z+n)],[1/4*(1-z)*(1+n)*(-1-z+n)],[1/2*(1-z**2)*(1-n)],[1/2*(1+z)*(1-n**2)],[1/2*(1-z**2)*(1+n)],[1/2*(1-z)*(1-n**2)]])
 dzpsis = lambda z,n: np.array([[-1/4*(n-1)*(2*z+n)],[-1/4*(n-1)*(2*z-n)],[1/4*(n+1)*(2*z+n)],[1/4*(n+1)*(2*z-n)],[(n-1)*z],[-1/2*(n**2-1)],[-(n+1)*z],[1/2*(n**2-1)]])
@@ -58,32 +58,40 @@ print('')
 print("L0's:")
 print(L0S)
 
-n_puntos = 300
-Z = np.linspace(-1,1,n_puntos)
-N = np.linspace(-1,1,n_puntos)
-
-X = []
-Y = []
-U = []
-
-for z in Z:
-	for n in N:
-		X.append(TX(z,n)[0])
-		Y.append(TY(z,n)[0])
-		U.append(atenuacion(X[-1],Y[-1]).tolist())
-U = np.array(U)
-print("min(f(x,y))")
-print(np.min(U,axis=0))
-
-lado = int(np.ceil(np.sqrt(n_atenuacion)))
+ls = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
+ls2 = [1,0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1]
 fig = plt.figure()
-for i in range(n_atenuacion):
-	ax = fig.add_subplot(lado,lado,i+1,projection='3d')
-	surf = ax.plot_trisurf(X,Y,U[:,i],cmap='magma')
-	ax.set_title(r"$\int_{V'}{A(|x-x'|)}{dv'}=$"+'{:.3f}'.format(integral[i])+'\n'+r'$\lambda_0=$'+'{:.3f}'.format(L0S[i]))
-	plt.colorbar(surf)
-	ax.set_xlabel(r'$x$')
-	ax.set_ylabel(r'$y$')
-	ax.set_zlabel(r'$f(x,y)$')
-fig.suptitle('Funciones de Atenuación con:\n'+r'$l=$'+format(l)+'\n'+r'$LR='+format(m0)+'l$')
+ax = fig.add_subplot()
+Z = np.linspace(-1,1,1000)
+for l,l2 in zip(ls,ls2):
+	f4 = lambda x,y: r(x,y)/l*np.exp(-r(x,y)/l)
+	L0_custom = 1/4/np.pi/l/l
+	L0S = np.array([L0_custom])
+	atenuacion = lambda x,y: np.array([f4(x,y)])*L0S
+	LR = (m0)*l
+	dl = np.sqrt(2)/2*LR
+	coords = np.array([
+		[-dl,-dl],
+		[dl,-dl],
+		[dl,dl],
+		[-dl,dl],
+		[0,-LR],
+		[LR,0],
+		[0,LR],
+		[-LR,0]])
+
+	dxdz = lambda z, n: coords[:, 0] @ dzpsis(z, n)
+	dydz = lambda z, n: coords[:, 1] @ dzpsis(z, n)
+	dxdn = lambda z, n: coords[:, 0] @ dnpsis(z, n)
+	dydn = lambda z, n: coords[:, 1] @ dnpsis(z, n)
+	J = lambda z, n: np.array([[dxdz(z, n)[0], dydz(z, n)[0]], [dxdn(z, n)[0], dydn(z, n)[0]]])
+	TX = lambda z, n: coords[:, 0] @ psis(z, n)
+	TY = lambda z, n: coords[:, 1] @ psis(z, n)
+	X = []
+	Y = []
+	for z in Z:
+		X.append(TX(z,0)[0])
+		Y.append(atenuacion(X[-1],0).tolist())
+	plt.plot(X,Y,label=format(l)+'')
+plt.legend()
 plt.show()
