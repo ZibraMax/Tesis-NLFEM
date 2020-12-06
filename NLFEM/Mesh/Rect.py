@@ -2,7 +2,7 @@ import numpy as np
 from .Geometria import *
 
 class Rect(Geometria):
-	def __init__(this,file,nx=30,ny=30):
+	def __init__(this,file):
 		gdls = []
 		diccionarios = []
 		diccionariosnl = []
@@ -23,9 +23,47 @@ class Rect(Geometria):
 			for _ in range(nele):
 				linea = list(map(lambda x: int(x)-1,archivo.readline().split('	')[1:]))
 				diccionariosnl.append(linea)
-		segmentos.append([0,diccionarios[nx-1][1]])
-		segmentos.append([diccionarios[nx-1][1],diccionarios[nx*ny-1][2]])
-		segmentos.append([diccionarios[nx*ny-1][2],diccionarios[nx*ny-nx][3]])
-		segmentos.append([diccionarios[nx*ny-nx][3],0])
-		super().__init__(vertices, diccionarios, gdls, tipos, segmentos=segmentos)
+		super().__init__(vertices, diccionarios, gdls, tipos)
 		this.diccionariosnl = diccionariosnl
+		this.cbe = []
+
+	def generarCBdesdeBordeX(this, borde, valor=0):
+		cb = []
+		nodos = this.darNodosCB(borde)
+		cbe = np.zeros([len(nodos), 2])
+		cbe[:, 0] = nodos*2
+		cbe[:, 1] = valor
+		cb += cbe.tolist()
+		return cb
+
+	def generarCBdesdeBordeY(this, borde, valor=0):
+		cb = []
+		nodos = this.darNodosCB(borde)
+		cbe = np.zeros([len(nodos), 2])
+		cbe[:, 0] = nodos*2+1
+		cbe[:, 1] = valor
+		cb += cbe.tolist()
+		return cb
+
+	def generarCBXdesdeCoordenada(this,x,y,valor=0):
+		masCercano1 = None
+		d1 = np.Inf
+		for i,gdl in enumerate(this.gdls):
+			r1 = np.sqrt((x-gdl[0])**2+(y-gdl[1])**2)
+			if r1 < d1:
+				d1 = r1
+				masCercano1 = i
+		return [[i*2,valor]]
+
+	def generarCBYdesdeCoordenada(this,x,y,valor=0):
+		masCercano1 = None
+		d1 = np.Inf
+		for i,gdl in enumerate(this.gdls):
+			r1 = np.sqrt((x-gdl[0])**2+(y-gdl[1])**2)
+			if r1 < d1:
+				d1 = r1
+				masCercano1 = i
+		return [[i*2+1,valor]]
+
+	def generarCBdesdeBorde(this, borde, valor=[0,0]):
+		return this.generarCBdesdeBordeX(borde, valor[0])+this.generarCBdesdeBordeY(borde, valor[1])

@@ -277,11 +277,6 @@ int main (int argc, char const *argv[]) {
 									} else {
 										cout<<"ERROR EN ELECCION DE FUNCION DE ATENUACION";
 									}
-									if (contj==1) {
-										double L0 = 1.0/2/PI_calc/l/l/t;
-										double azn2 = atenuacion(x,y,xnl,ynl,L0,l);
-										cout<<AZN<<","<<azn2<<","<<i_nl<<","<<j_nl<<","<<i<<","<<j<<","<<sqrt(pow((x-xnl),2)+pow((y-ynl),2))<<endl;
-									}
 									KKUU += t * t * AZN * (C11 * dfdx_i * dfdxnl_j + C66 * dfdy_i * dfdynl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
 									KKUV += t * t * AZN * (C12 * dfdx_i * dfdynl_j + C66 * dfdy_i * dfdxnl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
 									KKVU += t * t * AZN * (C12 * dfdy_i * dfdxnl_j + C66 * dfdx_i * dfdynl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
@@ -290,7 +285,6 @@ int main (int argc, char const *argv[]) {
 							}
 						}
 					}
-					cout<<"--------------------------------"<<endl;
 					KUU(gdli,gdlj)=KKUU;
 					KUV(gdli,gdlj)=KKUV;
 					KVU(gdli,gdlj)=KKVU;

@@ -10,12 +10,26 @@
 \usepackage{lastpage}
 \usepackage{csquotes}
 \usepackage{lipsum}
+\usepackage{comment}
+\usepackage{fontawesome}
+\usepackage{dirtree}
+\newcommand{\filetree}[1]{{\faFileCodeO}\ {#1}}
+\newcommand{\foldertree}[1]{{\faFolderOpenO}\ {#1}}
+
+
 \usepackage[spanish]{babel}
 \usepackage[
 backend=biber,
 style=apa
 ]{biblatex}
+\DeclareLanguageMapping{spanish}{spanish-apa}
+
+\setcounter{smartand}{0}
+\DefineBibliographyStrings{spanish}{%
+    andothers = {et al.},
+}
 \addbibresource{referencias/Referencias.bib}
+
 \AtBeginBibliography{\sffamily}
 \decimalpoint
 
@@ -26,7 +40,14 @@ style=apa
 \usetikzlibrary{patterns,shapes.arrows}
 \pgfplotsset{compat=newest}
 \usepackage{hyperref}
-
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    pdfauthor=Arturo Rodriguez,    
+    urlcolor=blue,
+}
+\urlstyle{same}
 \usepackage{caption}
 \usepackage{subcaption}
 
@@ -42,9 +63,9 @@ style=apa
 \DeclareCaptionFont{captionFont}{\sffamily}
 
 \captionsetup{
-    width=0.9\linewidth, % width of caption is 90% of current textwidth
-    labelfont=bf,        % the label, e.g. figure 12, is bold
-    font=small,          % the whole caption text (label + content) is small
+    width=0.9\linewidth,
+    labelfont=bf,
+    font=small,
     labelsep=period,
     font=captionFont,
 }
@@ -78,7 +99,7 @@ style=apa
 
 \lfoot{\sffamily Proyecto de Grado}
 \cfoot{}
-\rfoot{\sffamily Página \textbf{\thepage\ }de \textbf{\pageref{LastPage}}}
+\rfoot{\sffamily Página \textbf{\thepage\ }de \textbf{\pageref*{LastPage}}}
 \headsep 1.5em
 
 \renewcommand{\footrulewidth}{0.4pt}
@@ -105,17 +126,19 @@ style=apa
 \date{Diciembre 2020}
 \maketitle
 \thispagestyle{fancy}
+{\hypersetup{hidelinks}
 \tableofcontents
 \listoffigures
 \listoftables
+}
 \newpage
 
 %Cuerpo
 \setpapersize{A4}
-\setmargins{3cm}        % Margen izquierda
-{1cm}                   % Margen superior
-{15cm}                  % Margen derecha
-{22.42cm}               % Margen inferior
+\setmargins{3cm}
+{1cm}
+{15cm}
+{22.42cm}
 {10pt}
 {1cm}
 {0pt}
@@ -124,7 +147,7 @@ style=apa
 \rhead{\sffamily da.rodriguezh@uniandes.edu.co}
 \lfoot{\sffamily Proyecto de Grado}
 \cfoot{}
-\rfoot{\sffamily Página \textbf{\thepage\ }de \textbf{\pageref{LastPage}}}
+\rfoot{\sffamily Página \textbf{\thepage\ }de \textbf{\pageref*{LastPage}}}
 \headheight 20pt
 \footskip 40pt
 \textheight 680pt

@@ -3,7 +3,7 @@ from ..Utils import isBetween
 import matplotlib.pyplot as plt
 
 class Geometria:
-    def __init__(this, vertices, diccionarios, gdls, tipos, segmentos=None):
+    def __init__(this, vertices, diccionarios, gdls, tipos, segmentos=[]):
         this.Areas = []
         this.vertices = vertices
         this.diccionarios = diccionarios
@@ -41,7 +41,30 @@ class Geometria:
                 cy += (coords[j][1]+coords[j+1][1])*mult
             this.Areas.append(np.abs(area/2))
             this.Centroides.append([cx/3/area,cy/3/area])
-
+    def generarSegmentosDesdeCoordenadas(this,p0,p1):
+        masCercano1 = None
+        d1 = np.Inf
+        masCercano2 = None
+        d2 = np.Inf
+        for i,gdl in enumerate(this.gdls):
+            r1 = np.sqrt((p0[0]-gdl[0])**2+(p0[1]-gdl[1])**2)
+            r2 = np.sqrt((p1[0]-gdl[0])**2+(p1[1]-gdl[1])**2)
+            if r1 < d1:
+                d1 = r1
+                masCercano1 = i
+            if r2 < d2:
+                d2 = r2
+                masCercano2 = i
+        this.segmentos.append([masCercano1,masCercano2])
+    def generarCBdesdeCoordenada(this,x,y,valor=0):
+        masCercano1 = None
+        d1 = np.Inf
+        for i,gdl in enumerate(this.gdls):
+            r1 = np.sqrt((x-gdl[0])**2+(y-gdl[1])**2)
+            if r1 < d1:
+                d1 = r1
+                masCercano1 = i
+        return [[i,valor]]
     def darNodosCB(this, segmento):
         a = []
         ps = np.array(this.gdls)[this.segmentos[segmento]].tolist()
@@ -128,3 +151,4 @@ class Geometria:
 
         for p, l in zip(gdls, labels):
             ax.annotate(l, p, size=texto, textcoords="offset points", xytext=(-0, -2.5), ha='center')
+        plt.show()

@@ -22,7 +22,7 @@ class FEM:
             this.F[np.ix_(e.gdl)] += e.Fe
             this.Q[np.ix_(e.gdl)] += e.Qe
         this._K = np.copy(this.K)
-    def condicionesFrontera(this,cbe,cbn):
+    def condicionesFrontera(this):
         for i in this.cbn:
             this.Q[int(i[0])] = i[1]
         for i in this.cbe:
@@ -37,7 +37,7 @@ class FEM:
         for i in this.cbe:
             this.S[int(i[0])] = i[1]
     def solucionarSistemaEcuaciones(this):
-        this.U = np.linalg.inv(this.K) @ this.S
+        this.U = np.linalg.solve(this.K,this.S)
         for e in this.elementos:
             e.Ue = this.U[np.ix_(e.gdl)]
     def solucionar(this,plot=True,figsize=[14,12],cmap='magma',markersize=2,linewidth=2,mask=None, **kargs):

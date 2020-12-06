@@ -1,21 +1,261 @@
+\begin{comment}
+\addbibresource{referencias/Referencias.bib}
+\end{comment}
+
 \section{Metodología}
 \label{sc:metodos}
+	En orden de cumplir con los objetivos propuestos en el capítulo \ref{sc:objetivos}, se plantea una implementación de NL-FEM que permita realizar variaciones en los parámetros. Para ello, se parte de la metodología propuesta por Pisano \parencite{Pisano2009} que sigue la ecuación constitutiva planteada en el capítulo \ref{sc:teoria}
 	\subsection{Implementación Elasticidad No Local}
 	\label{sub:implementación}
+	Para llegar a la implementación se parte de la implementación clásica (local) de FEM. Para efectos de este estudio se asumen esfuerzos planos, por lo que:
+	\begin{equation}
+		\sigma_z=0
+	\end{equation}
 		\subsubsection{Método FEM}
+		Se parte de la metodología planteada en \parencite{Reddy} donde se divide el método en 6 pasos:
+			\begin{enumerate}
+				\item Enmallado:
+
+				Se divide el dominio en elementos y se enumeran sus nodos con grados de libertad. Para el caso de elasticidad, se deben tener dos grados de libertad por nodo, uno que pertenece al desplazamiento en x y otro que pertenece al desplazamiento en y. El número de nodos por elemento depende del orden de aproximación y de la geometría del elemento. Para este estudio se usarán elementos de cuatro lados con 8 nodos por elemento, comúnmente llamados \textit{Serendipity Elements}.
+				\item Ecuaciones a nivel de elemento
+
+				Mediante un modelo de elementos finitos (al que se puede llegar con la forma débil de la ecuación diferencial) se realiza el proceso de integración de las matrices de coeficientes, fuerzas nodales y flujos por elemento. Generalmente la integración se realiza usando la cuadratura de Gauss-Legendre.
+				\item Ensamblaje
+
+				Se obliga a la solución a ser continua en todo el dominio y se asegura el equilibrio de flujos en los nodos. Esto termina en un sistema de ecuaciones el cual se ensambla mediante las matrices y vectores encontrados en el paso anterior. 
+				\item Imposición de condiciones de borde
+
+				Se imponen condiciones de borde operando matricialmente los valores conocidos para la solución o asignando directamente el flujo conocido al sistema de ecuaciones. 
+				\item Solución
+
+				Se soluciona el sistema de ecuaciones encontrando la solución en cada grado de libertad.
+				\item Post - Proceso
+
+				Se pueden encontrar las soluciones para las variables secundarias (en el caso de elasticidad son las deformaciones en X y Y). El objetivo es poder mostrar gráficas de resultados.
+			\end{enumerate}
 		\subsubsection{Modificaciones No Locales}
+		Para la inclusión de la no localidad se deben modificar los 3 primeros pasos del método local. Estos cambios se deben a la inclusión de una integral convolutiva en la ecuación constitutiva y a la elección de la función de atenuación.
 			\begin{enumerate}
 				\item Enmallado
-				\item Integración
+
+				Uno de los cambios mas relevantes en el proceso de NL-FEM es la inclusión de los elementos no locales por cada elemento local. Para ello, la literatura se propone encontrar los elementos cuyos centroides se encuentren dentro de una distancia de influencia $Lr$ \parencite{article}, sin embargo, parencite{Fernandoayudaporfavor} sugiere que el proceso de selección de elementos no locales debe tener en cuenta la distancia adicional que se tenga al punto mas alejado del elemento. En la \textbf{Figura (REF)} se muestran gráficamente ambos procesos.
+
+				Dadas las propiedades de las funciones de atenuación descritas en el capítulo \ref{sc:teoria}, se puede asegurar que si se toma una distancia $Lr\rightarrow\infty$ el resultado no cambia de manera significante. Esto simplificaría el proceso de enmallado en caso de que no se disponga de un algoritmo que reconozca los elementos no locales. En caso de que se tenga $Lr\rightarrow\infty$ el costo computacional aumenta severamente, por lo que se aconseja siempre identificar los elementos no locales.
+
+				Para este estudio se tomara $Lr$ variable, pero nunca menor de $6l$ como se expuso en el Capítulo \ref{sc:teoria}
+
+				En conclusión, para cada elemento $n$ existe un numero $M$ de elementos no locales $m$. $M$ varía para cada elemento pues depende de su posición en el dominio.
+				\item Ecuaciones a nivel de elemento
+
+				Como se expuso en el capítulo \ref{sc:teoria}, se debe realizar una integral convolutiva en el proceso de integración. Esto se reduce a que por cada elemento se obtiene una matriz local y un numero específico de matrices no locales.
+
+				La matriz local se obtiene usando la teoría clásica (local) de elasticidad.
+
+				Las matrices no locales se encuentran usando el modelo propuesto por \cite{Pisano2009} donde:
+				\begin{equation}
+					\boldsymbol{k_{nm}^{nloc}}=\int_{V_n}\int_{V_m}{A(|\boldsymbol{x}-\boldsymbol{x'}|/l)\boldsymbol{B_n^T}(\boldsymbol{x})\boldsymbol{D}\boldsymbol{B_n}(\boldsymbol{x})}{dV'}{dV}
+					\label{eq:nl_1}
+				\end{equation}
+				Donde:
+				\begin{enumerate}
+					\item[] $n$ se refiere al elemento local.
+					\item[] $m$ se refiere al elemento no local.
+					\item[] $A$ es la función de atenuación.
+					\item[] $\boldsymbol{B_n}$ es la matriz de derivadas parciales de las funciones de forma.
+					\item[] $\boldsymbol{D}$ tensor de rigidez.
+					\item[] $\boldsymbol{x}$ representa un punto del elemento local $n$.
+					\item[] $\boldsymbol{x'}$ representa un punto del elemento no local $m$.
+				\end{enumerate}
+				En la terminología de \cite{Reddy} se puede reescribir esta ecuación separando los desplazamientos en x y y en submatrices de la matriz del elemento. Como ejemplo se muestra la matriz $\boldsymbol{K_{uu}}$:
+				\begin{equation}
+					\boldsymbol{UU_{nm}^{nloc}}[i,j]=\int_{\Omega_n}\int_{\Omega_m}{A(\rho)\left[C_{11}\frac{\partial \psi_i^{l}}{\partial x}\frac{\partial \psi_j^{nl}}{\partial x}+C_{66}\frac{\partial \psi_i^{l}}{\partial y}\frac{\partial \psi_j^{nl}}{\partial y}\right]}{d\Omega_m}{d\Omega_n}
+				\label{eq:nl_2}
+				\end{equation}
+				Donde:
+				\begin{enumerate}
+					\item[] $\rho$ es la relación $|\boldsymbol{x}-\boldsymbol{x'}|/l$.
+					\item[] $\psi_i$ es la i-ésima función de forma.
+					\item[] $C_{11},C_{66}$ son los componentes del tensor elástico para esfuerzos planos.
+					\item[] El super índice $^l$ significa que la función pertenece al elemento local.
+					\item[] El super índice $^{nl}$ significa que la función pertenece al elemento no local.
+					\item[] Las funciones estan evaluadas en los puntos correspondientes a su elemento, es decir, la función $\psi_i^{nl}$ esta evaluada en los puntos $x_{nl},y_{nl}$
+				\end{enumerate}
+				En los anexos (REF) se encuentra el desarrollo de las otras submatrices.
 				\item Ensamblaje
+
+				Dado que los elementos no locales tienen aportaciones a la matriz general del sistema, el ensablaje de dichos elementos debe tenerse en cuenta usando los grados de libertad de los elementos correspondientes. Por ejemplo, si se evalúa la matriz no local del elemento local 3 con respecto al elemento 4, en la matriz del sistema se debe incluir este aporte el las filas que correspondan a los grados de libertad del elemento 3 con las columnas que representen los grados de libertad del elemento 4. Esta generalización hace posible que se puedan tener combinación de diferentes tipos de elementos (como elementos triangulares y rectangulares).
 			\end{enumerate}
 		\subsubsection{Estructura del Programa}
+		La implementación computacional propuesta consta de 2 módulos, el módulo procesador y el módulo integrador. La implementación completa se encuentra en \href{https://github.com/ZibraMax/NLFEM}{GitHUB} 
 			\begin{enumerate}
-				\item Modulo Procesador
-				\item Modulo Integrador
+				\item Módulo Procesador
+
+				El módulo procesador esta escrito en Python y requiere de las librerías \textit{triangle}, \textit{NumPy} y \textit{Matplotilib}. Este módulo se puede encargar de la solución completa de un problema de NL-FEM.
+				Para el enmallado se usa el \textit{wrapper} de \textit{triangle} \parencite{triangle}, que lleva el mismo nombre. Fue desarrollado por (REF) y consta de una serie de funciones que realiza triangulaciones Delauney. El enmallado por \textit{triangle} no suele ser uniforme, ya que en el proceso los elementos son refinados para obligar a que los ángulos de los triángulos no sean menores a 35 grados.
+				Adicionalmente Fernando (REF) desarrolló un algoritmo para realizar el proceso de enmallado en dominios rectangulares identificando elementos no locales a una distancia $Lr$. Esto facilitó el proceso de enmallado para los casos de estudio propuestos.
+
+				Para las ecuaciones a nivel de elemento se usa la ecuación \ref{eq:nl_2} y sus variaciones de los anexos (REF).
+
+				Para la integración se usa la cuadratura de Gauss Legendre. Se puede integrar con cualquier número de puntos. Los puntos se extraen de la librería \href{https://numpy.org/doc/stable/reference/generated/numpy.polynomial.legendre.leggauss.html}{NumPy}.
+
+				Para el ensamblaje de matrices y vectores se usan las propiedades de los arreglos de \textit{NumPy}.
+
+				Para las condiciones de borde se crearon métodos auxiliares que permiten generar las condiciones en los nodos que pertenezcan a segmentos. Los segmentos pueden ser definidos por el usuario o ser generados automáticamente por el programa. Esto se realizó ya que las condiciones de borde generalmente se asignan en los contornos del dominio.
+				
+				Las condiciones de borde se toman como listas nativas de Python, lo que permite que se puedan manejar de manera sencilla. Un ejemplo es tener condiciones de borde en dos segmentos distintos. Para poder concatenarlas y que el programa reconzca y aplique ambas condiciones adecuadamente basta con usar el símbolo + entre ambas condiciones de borde y automáticamente el programa será capaz de aplicarlas correctamente. En el caso en el que se aplique una condición de borde natural y esencial al mismo nodo el programa reconocerá la condición de borde esencial.
+
+				Para aplicar las condiciones de borde se hace uso del método matricial que cambia las filas y columnas de los grados de libertad con condición de borde a 0 exceptuando la diagonal. En caso de que se apliquen dos condiciones de borde distintas al mismo nodo, el programa reconocerá la segunda condición de borde como la correcta.
+
+				Para la solución del sistema de ecuaciones se usa la librería \href{https://numpy.org/doc/stable/reference/generated/numpy.linalg.solve.html}{NumPy}
+
+				Para las gráficas se usa la librería \textit{Matplotlib}. Se pueden graficar las soluciones así como las variables secundarias. Para encontrar perfiles en la solución se creó un algoritmo que extrae el perfil interpolando la solución con las funciones de forma. Dado que las funciones de forma se evalúan en el dominio natural, se implementó un algoritmo de mapeo inverso usando el método de Newton.
+
+				\item Módulo Integrador
+
+				Debido a que Python es un lenguaje interpretado (REF), se conoce con anterioridad que el lenguaje será lento para procesos iterativos complejos. Para el caso de NL-FEM el paso mas costoso computacional mente es la integración de las matrices no locales, por tal razon, se decidió realizar un segundo módulo que se encargue unicamente de realizar el proceso de integración. Para ello se usó C++ que es un lenguaje compilado. En este programa se siguen exactamente los mismos paradigmas que se introdujeron en el módulo procesador con la única diferencia que al ser un programa ejecutable, se deben proporcionar los parámetros por medio de la consola en lugar de modificarlos en el código fuente.
+
+				Gracias al módulo \textit{subprocess} de Python se pudo automatizar el proceso de llamar al programa de C++ desde Python, es decir, el usuario no debe salir de Python para realizar el proceso de integración.
+
+				El módulo integrador usa la cuadratura de Gauss Legendre y obtiene los puntos de una implementación propia adaptada de \href{http://www.rosettacode.org/wiki/Numerical_integration/Gauss-Legendre_Quadrature}{Rosseta Code}
 				\item Manejo de datos y recurrencia
+
+				Para garantizar la comunicación correcta de los dos módulos se manejan archivos que guardan la información sobre el enmallado y la integración.
+
+				\begin{enumerate}
+
+					\item Archivo enmallado:
+						Se parte como base del archivo de enmallado del programa de Fernando (REF) que sigue la estructura de la tabla \ref{tab:estructura_enmallado}. Este archivo es usado por el módulo procesador y el módulo integrador.
+
+						Al ser el archivo principal, lo ideal es generar los archivos de enmallado previamente a realizar el proceso NL-FEM. Por ello, con el enmallado interno de \textit{triangle} se provee una funcionalidad que exporta el archivo de enmallado con el objetivo que el modulo integrador funcione incluso si no se usa un enmallado previamente definido.
+					\item Archivos integración:
+						Dado que generar las matrices de los elementos es un proceso computacional mente costoso, el módulo integrador generará una serie de carpetas que guardan la información de las matrices. Para cada elemento del enmallado se guarda un archivo KL\_i.csv que contiene la matriz local. Para cada elemento del enmallado se guarda un archivo llamado KNLS.csv donde cada fila del archivo corresponde a la j-ésima matriz no local. Estas matrices se aplanan por columnas y filas por lo que al cargarlas se deben transponer. La estructura del directorio de salida se encuentra en la figura \ref{fig:archivos_matrices}
+				\end{enumerate}
+
+				\begin{table}
+				    \caption{Estructura del archivo de enmallado}
+				    \sffamily
+				    \centering
+				    \begin{tabular}{c|c c}
+				    Linea 1 & \#GDL & \#E \\
+				    $GDL_i$ & X & Y\\
+				    $E_i$ & $GDL_1$ & $GDL_j$ \\
+				    $ENL_i,j$ & \#ENL & $E_{j}^{nl}$ \\
+				    \end{tabular}
+				    \label{tab:estructura_enmallado}
+				\end{table}
+
+				\begin{figure}
+					\centering
+					\sffamily
+					\begin{minipage}{7cm}
+					\dirtree{%
+					.1 /.
+					.2 \foldertree{MATRICES}.
+					.3 \foldertree{Elemento 1}.
+					.4 \filetree{KL\_1.csv}.
+					.4 \filetree{KNLS.csv}.
+					.3 \foldertree{Elemento i}.
+					.4 \filetree{KL\_i.csv}.
+					.4 \filetree{KNLS.csv}.
+					}
+					\end{minipage}
+					\caption{Estructura de guardado de archivos para las matrices}
+					\label{fig:archivos_matrices}
+				\end{figure}
+
+				\item Estructura final
+				El programa completo se orientó a objetos y su estructura se muestra en el diagrama UML de la figura (REF)
 			\end{enumerate}
 
+	\subsection{Casos de Estudio}
+	\label{sub:casosestudio}
+	Para poder evaluar el funcionamiento del programa y poder validar los resultados se parte de los casos de estudio propuestos por \cite{Pisano2009}.
+
+	\begin{enumerate}
+		\item \textbf{Barra a tensión:}
+
+		La barra a tensión se puede modelar como se muestra en la figura \ref{fig:barra_tension}
+
+		\begin{figure}
+			\centering
+			\sffamily
+			\includegraphics[width=0.6\textwidth]{figuras/barra.png}
+			\caption{Modelo de barra unidimensional (FIGURA PARCIAL, SE CAMBIARA POR UNA PROPIA)}
+			\label{fig:barra_tension}
+		\end{figure}
+
+		Se tienen las siguientes características:
+		\begin{enumerate}
+			\item[] $L = 50\ cm$
+			\item[] $h = 1\ cm$
+			\item[] $t = 0.1\ cm$
+			\item[] $u_0 = 0.05\ cm$
+			\item[] $E = 2.1*10^6\ daN/cm^2$
+			\item[] $\nu = 2.1*10^6\ daN/cm^2$
+		\end{enumerate}
+
+		Bajo las siguientes condiciones de borde:
+		\begin{enumerate}
+			\item[] $U = 0$ en $x=0$
+			\item[] $V = 0$ en el punto $x=0,y=h/2$
+			\item[] $U = u_0$ en $x=L$
+		\end{enumerate}
+
+		Usando el programa, este problema puede modelarse como:
+
+		\begin{minipage}{0.45\textwidth}
+			\begin{figure}
+				\centering
+				\sffamily
+				\includegraphics[width=0.9\textwidth]{figuras/barra_c1.png}
+				\caption{Paso 1. Importar librerías y enmallado}
+				\label{fig:imports_palo}
+			\end{figure}
+		\end{minipage}
+		\begin{minipage}{0.45\textwidth}
+			Se importa la librería NLFEM que contiene el programa de NL-FEM completo. Se importan las librerías \textit{NumPy} y \textit{Matplotlib}. Se definen las variables iniciales del problema, por ejemplo, el módulo de Young, grosor, etc. Se llama al módulo integrador con el comando \textit{subprocess} y se le pasan por parámetro los datos del enmallado. Note que el archivo index.txt contiene los datos del enmallado y sigue los lineamientos propuestos en la tabla \ref{tab:estructura_enmallado}. Por último, se carga el enmallado como una geometría del programa. En las líneas 22 y 23 se mostrará gráficamente el enmallado, por lo tanto, estas dos últimas líneas son opcionales.
+		\end{minipage}
+
+		\begin{minipage}{0.45\textwidth}
+			\begin{figure}
+				\centering
+				\sffamily
+				\includegraphics[width=0.9\textwidth]{figuras/barra_c1.png}
+				\caption{Paso 1. Importar librerías y enmallado}
+				\label{fig:imports_palo}
+			\end{figure}
+		\end{minipage}
+		\begin{minipage}{0.45\textwidth}
+			Se importa la librería NLFEM que contiene el programa de NL-FEM completo. Se importan las librerías \textit{NumPy} y \textit{Matplotlib}. Se definen las variables iniciales del problema, por ejemplo, el módulo de Young, grosor, etc. Se llama al módulo integrador con el comando \textit{subprocess} y se le pasan por parámetro los datos del enmallado. Note que el archivo index.txt contiene los datos del enmallado y sigue los lineamientos propuestos en la tabla \ref{tab:estructura_enmallado}. Por último, se carga el enmallado como una geometría del programa. En las líneas 22 y 23 se mostrará gráficamente el enmallado, por lo tanto, estas dos últimas líneas son opcionales.
+		\end{minipage}
+
+
+		\item \textbf{Placa a tensión:}
+
+		\begin{figure}
+			\centering
+			\sffamily
+			\includegraphics[width=0.6\textwidth]{figuras/placa.jpeg}
+			\caption{Modelo de placa a tensión (FIGURA PARCIAL, SE CAMBIARA POR UNA PROPIA)}
+			\label{fig:placa_tension}
+		\end{figure}
+
+		Se tienen las siguientes características:
+		\begin{enumerate}
+			\item[] $a = 5\ cm$
+			\item[] $t = 0.5\ cm$
+			\item[] $u_0 = 0.001\ cm$
+			\item[] $E = 2.1*10^6\ daN/cm^2$
+			\item[] $\nu = 2.1*10^6\ daN/cm^2$
+		\end{enumerate}
+
+		Bajo las siguientes condiciones de borde:
+		\begin{enumerate}
+			\item[] $U = 0,V=0$ en $x=0$
+			\item[] $U = u_0$ en $x=a$
+		\end{enumerate}
+
+	\end{enumerate}
 	\subsection{Validación}
 	\label{sub:validacion}
 

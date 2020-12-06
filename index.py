@@ -2,285 +2,55 @@ import NLFEM
 import numpy as np
 import matplotlib.pyplot as plt
 from NLFEM.Mesh import Rect
-import os
+import subprocess
 
-import copy
+RUTA_M = 'NLFEM_C++/MATRICES'
 
-MATRICES_DESDE = 'C++'
-RUTA_M = ''
-if MATRICES_DESDE == 'FORTRAN':
-	RUTA_M = 'NLFEM_FORTRAN/MATRICES'
-elif MATRICES_DESDE == 'C++':
-	RUTA_M = 'NLFEM_C++/MATRICESmodificado'
-else:
-	print('Arturo por favor deja de jugar')
-def postProcesoX(this, U):
-    this.Ue = U[np.ix_(this.gdl)]
-    this._Ue = this.Ue.T[0].tolist()
-    this._Ue.append(this.Ue[0][0])
-    Z = this._dominioNaturalZ
-    N = this._dominioNaturalN
-    x = []
-    y = []
-    u = []
-    this.U = lambda z, n: grad(this, z, n)[0]
-    for z, n in zip(Z, N):
-        x.append(this.Tx(z, n)[0])
-        y.append(this.Ty(z, n)[0])
-        u.append(this.U(z, n)[0])
-    return x, y, u
-
-def postProcesoXNodos(this, U):
-    this.Ue = U[np.ix_(this.gdl)]
-    this._Ue = this.Ue.T[0].tolist()
-    this._Ue.append(this.Ue[0][0])
-    Z = this.ZNatural
-    N = this.NNatural
-    u = []
-    this.U = lambda z, n: grad(this, z, n)[0]
-    for z, n in zip(Z, N):
-        u.append(this.U(z, n)[0])
-    return np.array(u).reshape([len(Z),1])
-
-def postProcesoY(this, U):
-    this.Ue = U[np.ix_(this.gdl)]
-    this._Ue = this.Ue.T[0].tolist()
-    this._Ue.append(this.Ue[0][0])
-    Z = this._dominioNaturalZ
-    N = this._dominioNaturalN
-    x = []
-    y = []
-    u = []
-    this.U = lambda z, n: grad(this, z, n)[1]
-    for z, n in zip(Z, N):
-        x.append(this.Tx(z, n)[0])
-        y.append(this.Ty(z, n)[0])
-        u.append(this.U(z, n)[0])
-    return x, y, u
-
-def grad(this, z, n):
-    dz = this.dzpsis(z, n)
-    dn = this.dnpsis(z, n)
-    result = []
-    for i in range(len(dz)):
-        result.append(this._J(z, n) @ np.array([[dz[i][0]], [dn[i][0]]]))
-    result = np.array(result)
-    n = len(result)
-    U = np.linspace(0,n-1,n).astype(int)
-    V = U*2+1
-    dx = (this.Ue[np.ix_(U)].T @ result[:, 0])[0]
-    dy = (this.Ue[np.ix_(V)].T @ result[:, 1])[0]
-    return np.array([dx, dy])
-def defUnitariaX(this,figsize):
-    count=0
-    fig = plt.figure(figsize=figsize)
-    ax = fig.add_subplot(projection='3d')
-    markersize = 2
-    cmap = 'magma'
-    linewidth = 2
-    xtotal = []
-    ytotal = []
-    ztotal = []
-    count = 0
-    for e in this.elementos:
-        count+=1
-        x,y,u = postProcesoX(e,this.U)
-        xtotal.extend(x)
-        ytotal.extend(y)
-        ztotal.extend(u)
-    surf = ax.plot_trisurf(xtotal, ytotal, ztotal,cmap=cmap,zorder=1)
-    cbar = fig.colorbar(surf)
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel(r'$\varepsilon x$')
-    ax.set_title(r'$\frac{\partial U}{\partial X}$')
-    return xtotal,ytotal,ztotal
-def defUnitariaY(this,figsize):
-    count=0
-    fig = plt.figure(figsize=figsize)
-    ax = fig.add_subplot(projection='3d')
-    markersize = 2
-    cmap = 'magma'
-    linewidth = 2
-    xtotal = []
-    ytotal = []
-    ztotal = []
-    count = 0
-    for e in this.elementos:
-        count+=1
-        x,y,u = postProcesoY(e,this.U)
-        xtotal.extend(x)
-        ytotal.extend(y)
-        ztotal.extend(u)
-    surf = ax.plot_trisurf(xtotal, ytotal, ztotal,cmap=cmap,zorder=1)
-    cbar = fig.colorbar(surf)
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel(r'$\varepsilon x$')
-    ax.set_title(r'$\frac{\partial U}{\partial Y}$')
-
-def darDeformacionXY(this, U, x, y, n=100):
-    this.Ue = U[np.ix_(this.gdl)]
-    this.U = lambda z, n: this.Ue.T[0] @ this.psis(z, n)
-    zeta,eta = this.mappingInverso(x, y, n).reshape(1,2)[0].tolist()
-    return this.U(zeta,eta)
-
-
-def generarCBdesdeBordeX(this, borde, valor=0):
-    cb = []
-    nodos = this.darNodosCB(borde)
-    cbe = np.zeros([len(nodos), 2])
-    cbe[:, 0] = nodos*2
-    cbe[:, 1] = valor
-    cb += cbe.tolist()
-    return cb
-
-def generarCBdesdeBordeY(this, borde, valor=0):
-    cb = []
-    nodos = this.darNodosCB(borde)
-    cbe = np.zeros([len(nodos), 2])
-    cbe[:, 0] = nodos*2+1
-    cbe[:, 1] = valor
-    cb += cbe.tolist()
-    return cb
-
-def generarCBdesdeBorde(this, borde, valor=[0,0]):
-    return generarCBdesdeBordeX(this, borde, valor[0])+generarCBdesdeBordeY(this, borde, valor[1])
-
-a = 5
 E = 2.1*10**6
 V = 0.2
 u = 0.001
+a = 5
+t = 0.5
+l = 0.1
 
-NEX = 30
-NEY = 30
+import os
+if not os.path.exists(RUTA_M):
+    subprocess.run("index.exe input.txt 3 "+format(E)+" "+format(V)+" "+format(t)+" "+format(l)+" "+RUTA_M+" 1", shell=True, check=True)
 
-PATH = os.getcwd()
-nombre = "\\NLFEM\\Mesh\\input.txt"
-GEOMETRIA = Rect.Rect(PATH+nombre,NEX,NEY)
-GEOMETRIA.segmentos = [[0,60],[60,2820],[2820,2760],[2760,0]]#[[0, 100], [100, 7700], [7700, 7600], [7600, 0]]
-GEOMETRIA.cbe = []
+GEOMETRIA = Rect.Rect("NLFEM/Mesh/input.txt")
+GEOMETRIA.generarSegmentosDesdeCoordenadas([0,0],[a,0])
+GEOMETRIA.generarSegmentosDesdeCoordenadas([a,0],[a,a])
+GEOMETRIA.generarSegmentosDesdeCoordenadas([a,a],[0,a])
+GEOMETRIA.generarSegmentosDesdeCoordenadas([0,a],[0,0])
+condiciones_borde_escenciales = GEOMETRIA.generarCBdesdeBorde(3,[0,0])+GEOMETRIA.generarCBdesdeBordeX(1,u)
+# GEOMETRIA.dibujarse()
 Objeto_FEM = NLFEM.NoLocal(GEOMETRIA)
-GEOMETRIA.cbe = generarCBdesdeBorde(GEOMETRIA,3,[0,0])+generarCBdesdeBordeX(GEOMETRIA,1,u)
-Objeto_FEM.definirCondicionesDeBorde(GEOMETRIA.cbe)
+Objeto_FEM.z1 = 0.5
 Objeto_FEM.generarElementos()
-print(GEOMETRIA.segmentos)
-for i,e in enumerate(Objeto_FEM.elementos):
-    n = len(e.coords)
-    K = np.loadtxt(RUTA_M+'/Elemento'+format(i+1)+'/KL_'+format(i+1)+'.csv',delimiter=',').reshape([16,16])
-    Q = np.zeros([2 * n, 1])
-    F = np.zeros([2 * n, 1])
-    e.determinarMatrices(K,F,Q)
-    knls = []
-    j=0
-    KNLS = np.loadtxt(RUTA_M+'/Elemento'+format(i+1)+'/KNLS.csv',delimiter=',')
-    for enl in e.elementosnl:
-        KNL = KNLS[j].reshape([16,16]).T
-        if j==0:
-            print(e.elementosnl,enl,i,KNL)
-        j+=1
-        knls.append(KNL)
-    e.KNLS = knls
-    print('Cargando matrices del elemento ' + format(i))
-PUNTOS = [-np.sqrt(3.0/5.0),0,np.sqrt(3.0/5.0)]
-for this in Objeto_FEM.elementos:
-    this._dominioNaturalZ = PUNTOS
-    this._dominioNaturalN = PUNTOS
-z1=0.5
-Objeto_FEM.z1 = z1
-Objeto_FEM.K = np.zeros([Objeto_FEM.n,Objeto_FEM.n])
-Objeto_FEM.F = np.zeros([Objeto_FEM.n,1])
-Objeto_FEM.Q = np.zeros([Objeto_FEM.n,1])
-Objeto_FEM.U = np.zeros([Objeto_FEM.n,1])
-Objeto_FEM.S = np.zeros([Objeto_FEM.n,1])
-Objeto_FEM.definirCondicionesDeBorde(Objeto_FEM.geometria.cbe)
+Objeto_FEM.importarMatricesCarpeta(RUTA_M)
+Objeto_FEM.definirCondicionesDeBorde(condiciones_borde_escenciales)
 Objeto_FEM.ensamblar()
-Objeto_FEM.condicionesFrontera(Objeto_FEM.cbe,Objeto_FEM.cbn)
+Objeto_FEM.condicionesFrontera()
 Objeto_FEM.solucionarSistemaEcuaciones()
 
-Objeto_FEMLOCAL = copy.deepcopy(Objeto_FEM)
-Objeto_FEMLOCAL.z1 = 1
-Objeto_FEMLOCAL.K = np.zeros([Objeto_FEMLOCAL.n,Objeto_FEMLOCAL.n])
-Objeto_FEMLOCAL.F = np.zeros([Objeto_FEMLOCAL.n,1])
-Objeto_FEMLOCAL.Q = np.zeros([Objeto_FEMLOCAL.n,1])
-Objeto_FEMLOCAL.U = np.zeros([Objeto_FEMLOCAL.n,1])
-Objeto_FEMLOCAL.S = np.zeros([Objeto_FEMLOCAL.n,1])
-Objeto_FEMLOCAL.definirCondicionesDeBorde(Objeto_FEMLOCAL.geometria.cbe)
-Objeto_FEMLOCAL.ensamblar()
-Objeto_FEMLOCAL.condicionesFrontera(Objeto_FEMLOCAL.cbe,Objeto_FEMLOCAL.cbn)
-Objeto_FEMLOCAL.solucionarSistemaEcuaciones()
+Objeto_FEM_Local = NLFEM.NoLocal(GEOMETRIA)
+Objeto_FEM_Local.z1 = 1
+Objeto_FEM_Local.generarElementos()
+Objeto_FEM_Local.importarMatricesCarpeta(RUTA_M)
+Objeto_FEM_Local.definirCondicionesDeBorde(condiciones_borde_escenciales)
+Objeto_FEM_Local.ensamblar()
+Objeto_FEM_Local.condicionesFrontera()
+Objeto_FEM_Local.solucionarSistemaEcuaciones()
 
-[XNoLocal, YNoLocal, ZNoLocal] = defUnitariaX(Objeto_FEM,[10,10])
-plt.savefig('deformacionsX.svg')
-plt.show()
-def perfilX(x,yi=0.00016,yf=0.0004):
-    _Y = np.linspace(0,5,100).tolist()
-    Z = []
-    Y = []
-    Zlocal = []
-    for y in _Y:
-        for i in range(len(Objeto_FEM.elementos)):
-            e = Objeto_FEM.elementos[i]
-            elocal = Objeto_FEMLOCAL.elementos[i]
-            if e.estaDentro(x,y):
-                U = postProcesoXNodos(e,Objeto_FEM.U)
-                Y.append(y)
-                Z.append(e.darSolucionXY(U, x, y, n=100))
-                U = postProcesoXNodos(elocal,Objeto_FEMLOCAL.U)
-                Zlocal.append(elocal.darSolucionXY(U, x, y, n=100))
-                break
-    plt.plot(Y,Z)
-    plt.plot(Y,Zlocal)
+Objeto_FEM.defUnitariaX([10,10])
 
-    plt.xlim(0, 5)
-    plt.ylim(yi, yf)
+Objeto_FEM.perfilY(0.019,0.00016,0.0004,0,a,label='No Local')
+Objeto_FEM_Local.perfilY(0.019,0.00016,0.0004,0,a,acum=True,label='Local')
 
-    plt.grid()
-    plt.title('Perfil a x='+format(x))
-    plt.xlabel('y')
-    plt.ylabel(r'$\frac{\partial U}{\partial x}=\varepsilon_x$')
-    plt.legend(['No Local','Local'])
-    plt.savefig('deformacionesXEnX'+format(x)+'.png',transparent=True)
-    plt.show()
-def perfilY(y,yi=0.00016,yf=0.0004):
-    _X = np.linspace(0,5,100).tolist()
-    Z = []
-    X = []
-    Zlocal = []
-    for x in _X:
-        for i in range(len(Objeto_FEM.elementos)):
-            e = Objeto_FEM.elementos[i]
-            elocal = Objeto_FEMLOCAL.elementos[i]
-            if e.estaDentro(x,y):
-                U = postProcesoXNodos(e,Objeto_FEM.U)
-                X.append(x)
-                Z.append(e.darSolucionXY(U, x, y, n=100))
-                U = postProcesoXNodos(elocal,Objeto_FEMLOCAL.U)
-                Zlocal.append(elocal.darSolucionXY(U, x, y, n=100))
-                break
-    plt.plot(X,Z)
-    plt.plot(X,Zlocal)
+Objeto_FEM.perfilY(2.519,0.00018,0.00028,0,a,label='No Local')
+Objeto_FEM_Local.perfilY(2.519,0.00018,0.00028,0,a,acum=True,label='Local')
 
-    plt.xlim(0, 5)
-    plt.ylim(yi, yf)
-
-    plt.grid()
-    plt.title('Perfil a y='+format(y))
-    plt.xlabel('x')
-    plt.ylabel(r'$\frac{\partial U}{\partial x}=\varepsilon_x$')
-    plt.legend(['No Local','Local'])
-    plt.savefig('deformacionesXEnY'+format(y)+'.png',transparent=True)
-    plt.show()
-#Vamos a ver, perfiles:
-
-#Figura 9
-print('Graficando perfil y')
-perfilY(0.019,0.00016,0.0004)
-print('Graficando perfil y')
-perfilY(2.519,0.00018,0.00028)
-
-#Figura 10
-print('Graficando perfil x')
-perfilX(0.019,0.00016,0.0004)
-print('Graficando perfil x')
-perfilX(2.519,0.00016,0.0004)
+Objeto_FEM.perfilX(0.019,0.00016,0.0004,0,a,label='No Local')
+Objeto_FEM_Local.perfilX(0.019,0.00016,0.0004,0,a,acum=True,label='Local')
+Objeto_FEM.perfilX(2.519,0.00016,0.0004,0,a,label='No Local')
+Objeto_FEM_Local.perfilX(2.519,0.00016,0.0004,0,a,acum=True,label='Local')
