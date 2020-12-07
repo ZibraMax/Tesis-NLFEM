@@ -3,6 +3,7 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{ragged2e}
+\usepackage{pdfpages}
 \usepackage{float}
 \usepackage{vmargin}
 \usepackage{wrapfig}
@@ -13,9 +14,27 @@
 \usepackage{comment}
 \usepackage{fontawesome}
 \usepackage{dirtree}
+\usepackage{svg}
 \newcommand{\filetree}[1]{{\faFileCodeO}\ {#1}}
 \newcommand{\foldertree}[1]{{\faFolderOpenO}\ {#1}}
 
+
+\usepackage{float}
+\usepackage{aliascnt}
+\newaliascnt{eqfloat}{equation}
+\newfloat{eqfloat}{h}{eqflts}
+\floatname{eqfloat}{Ecuación}
+
+\newcommand*{\ORGeqfloat}{}
+\let\ORGeqfloat\eqfloat
+\def\eqfloat{%
+  \let\ORIGINALcaption\caption
+  \def\caption{%
+    \addtocounter{equation}{-1}%
+    \ORIGINALcaption
+  }%
+  \ORGeqfloat
+}
 
 \usepackage[spanish]{babel}
 \usepackage[
@@ -26,13 +45,13 @@ style=apa
 
 \setcounter{smartand}{0}
 \DefineBibliographyStrings{spanish}{%
-    andothers = {et al.},
+    andothers = {\textit{et al.}},
 }
 \addbibresource{referencias/Referencias.bib}
 
 \AtBeginBibliography{\sffamily}
 \decimalpoint
-
+\newcommand\nombreProyecto{Nombre Fancy}
 \usepackage[utf8]{inputenc}
 \usepackage{pgfplots}
 \DeclareUnicodeCharacter{2212}{−}
@@ -70,6 +89,12 @@ style=apa
     font=captionFont,
 }
 
+\newcommand\inputpgf[2]{{
+\let\pgfimageWithoutPath\pgfimage
+\renewcommand{\pgfimage}[2][]{\pgfimageWithoutPath[##1]{#1/##2}}
+\input{#1/#2}
+}}
+
 \setpapersize{A4}
 \setmargins{3cm}        % Margen izquierda
 {1cm}                   % Margen superior
@@ -84,7 +109,7 @@ style=apa
 \usepackage{fancyhdr}
 
 
-\newcommand\course{\sffamily Nombre Proyecto}
+\newcommand\course{\sffamily \nombreProyecto}
 \newcommand\NetIDb{\sffamily \today}
 \newcommand\NetIDc{\sffamily Arturo Rodriguez: 201718348}
 \floatplacement{figure}{H}
@@ -93,11 +118,11 @@ style=apa
 \lhead{\NetIDc}
 \rhead{\sffamily da.rodriguezh@uniandes.edu.co\\\course}
 \lhead{\begin{picture}
-	(-1,-1) \put(-7,6){\includegraphics[width=3cm]{path5.png} }
+	(-1,-1) \put(-7,6){\includegraphics[width=3cm]{figuras/logoUniandes.pdf} }
 	\end{picture}\NetIDc\\\NetIDb}
 	
 
-\lfoot{\sffamily Proyecto de Grado}
+\lfoot{\sffamily Proyecto de Grado: \nombreProyecto}
 \cfoot{}
 \rfoot{\sffamily Página \textbf{\thepage\ }de \textbf{\pageref*{LastPage}}}
 \headsep 1.5em
@@ -114,18 +139,26 @@ style=apa
   \addtocounter{footnote}{-1}%
   \endgroup
 }
-
+\fancypagestyle{plain}{%
+  \lhead{\NetIDc}
+  \rhead{\sffamily da.rodriguezh@uniandes.edu.co\\\course}
+  \lhead{\begin{picture}
+    (-1,-1) \put(-7,6){\includegraphics[width=3cm]{figuras/logoUniandes.pdf} }
+    \end{picture}\NetIDc\\\NetIDb}
+  \lfoot{\sffamily Proyecto de Grado: \nombreProyecto}
+  \cfoot{}
+  \rfoot{\sffamily Página \textbf{\thepage\ }de \textbf{\pageref*{LastPage}}}
+}
 
 \begin{document}
 \sffamily
 
 %Portada
 \setlength{\headheight}{80pt}
-\title{NonLocal-FEM}
+\title{\nombreProyecto}
 \author{David Arturo Rodriguez Herrera}
 \date{Diciembre 2020}
 \maketitle
-\thispagestyle{fancy}
 {\hypersetup{hidelinks}
 \tableofcontents
 \listoffigures
@@ -156,7 +189,7 @@ style=apa
 
 \pagestyle{fancy}
 
-\section{Agradecimientos}
+% \section{Agradecimientos}
 
 \section{Resumen}
 
@@ -172,6 +205,8 @@ style=apa
 
 \include{conclusiones}
 
+\include{anexos}
+
 \newpage
-\printbibliography
+\printbibliography[heading=bibintoc]
 \end{document}

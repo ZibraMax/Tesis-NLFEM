@@ -374,19 +374,16 @@ class NoLocal(FEM):
 		plt.plot(Y,Z,label=label)
 
 
-		if filename == '':
-			pass
-		else:
-			plt.savefig(filename,transparent=True)
 		if acum:
 			plt.xlim(x0, xf)
 			plt.ylim(yi, yf)
 			plt.grid()
 			plt.legend()
-			plt.title('Perfil a x='+format(x))
 			plt.xlabel('y')
-			plt.ylabel(r'$\frac{\partial U}{\partial x}=\varepsilon_x$')
-			plt.show()
+		if filename == '':
+			pass
+		else:
+			plt.savefig(filename,transparent=True)
 
 	def perfilY(Objeto_FEM,y,yi=0.00016,yf=0.0004,x0=0,xf=50,filename='',acum=False,label=''):
 		_X = np.linspace(x0,xf,100).tolist()
@@ -403,19 +400,16 @@ class NoLocal(FEM):
 					break
 		plt.plot(X,Z,label=label)
 
-		if filename == '':
-			pass
-		else:
-			plt.savefig(filename,transparent=True)
 		if acum:
 			plt.xlim(x0, xf)
 			plt.ylim(yi, yf)
 			plt.legend()
 			plt.grid()
-			plt.title('Perfil a y='+format(y))
 			plt.xlabel('x')
-			plt.ylabel(r'$\frac{\partial U}{\partial x}=\varepsilon_x$')
-			plt.show()
+		if filename == '':
+			pass
+		else:
+			plt.savefig(filename,transparent=True)
 
 def postProcesoX(this, U):
 	this.Ue = U[np.ix_(this.gdl)]

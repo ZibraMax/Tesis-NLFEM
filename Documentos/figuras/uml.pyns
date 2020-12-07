@@ -1,0 +1,27 @@
+# PynSource Version 1.2
+{'type':'meta', 'info1':'Lorem ipsum dolor sit amet, consectetur adipiscing elit is latin. Comments are saved.'}
+{'type':'umlshape', 'id':'CuadrilateroL', 'x':226, 'y':445, 'width':140, 'height':64, 'attrs': '', 'meths': '__init__'}
+{'type':'umlshape', 'id':'integradorRectangular', 'x':107, 'y':243, 'width':220, 'height':96, 'attrs': '', 'meths': '__init__|intGauss2D|intGauss4DNL'}
+{'type':'umlshape', 'id':'Elemento', 'x':298, 'y':73, 'width':106, 'height':80, 'attrs': '', 'meths': '__init__|transfCoords'}
+{'type':'umlshape', 'id':'FEM', 'x':911, 'y':38, 'width':216, 'height':160, 'attrs': '', 'meths': '__init__|condicionesFrontera|definirCondicionesDeBorde|ensamblar|importarGeometria|solucionar|solucionarSistemaEcuaciones'}
+{'type':'umlshape', 'id':'FEM1V', 'x':1047, 'y':330, 'width':210, 'height':160, 'attrs': '', 'meths': 'EK|__init__|calcularMatrices|generarElementos|graficarMagnitudGradiente|graficarSolucion|graficarSolucionFast'}
+{'type':'umlshape', 'id':'integradorTriangular', 'x':417, 'y':239, 'width':210, 'height':112, 'attrs': '', 'meths': '__init__|estaDentro|intGauss2D|intGauss4DNL'}
+{'type':'umlshape', 'id':'NoLocal', 'x':759, 'y':268, 'width':194, 'height':240, 'attrs': '', 'meths': 'A|FUNCIONES|__init__|calcularMatrices|darDeformacionXY|defUnitariaX|defUnitariaY|dfdx|dfdy|generarElementos|graficarSolucion|importarMatricesCarpeta'}
+{'type':'umlshape', 'id':'SerendipityC', 'x':45, 'y':443, 'width':130, 'height':64, 'attrs': '', 'meths': '__init__'}
+{'type':'umlshape', 'id':'TriangularC', 'x':389, 'y':446, 'width':120, 'height':64, 'attrs': '', 'meths': '__init__'}
+{'type':'umlshape', 'id':'TriangularL', 'x':556, 'y':446, 'width':120, 'height':64, 'attrs': '', 'meths': '__init__'}
+{'type':'umlshape', 'id':'Delaunay1V', 'x':1319, 'y':414, 'width':110, 'height':64, 'attrs': '', 'meths': '__init__'}
+{'type':'umlshape', 'id':'Geometria', 'x':1377, 'y':53, 'width':266, 'height':208, 'attrs': '', 'meths': '__init__|centroideYArea|darNodosCB|definirTodasCondiciones|dibujarse|generarCBdesdeBorde|generarCBdesdeBordeX|generarCBdesdeBordeY|generarCBdesdeCoordenada|generarSegmentosDesdeCoordenadas'}
+{'type':'umlshape', 'id':'Rect', 'x':1547, 'y':384, 'width':210, 'height':144, 'attrs': '', 'meths': '__init__|generarCBXdesdeCoordenada|generarCBYdesdeCoordenada|generarCBdesdeBorde|generarCBdesdeBordeX|generarCBdesdeBordeY'}
+{'type':'edge', 'id':'CuadrilateroL_to_integradorRectangular', 'source':'CuadrilateroL', 'target':'integradorRectangular', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'FEM1V_to_FEM', 'source':'FEM1V', 'target':'FEM', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'integradorRectangular_to_Elemento', 'source':'integradorRectangular', 'target':'Elemento', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'integradorTriangular_to_Elemento', 'source':'integradorTriangular', 'target':'Elemento', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'NoLocal_to_FEM', 'source':'NoLocal', 'target':'FEM', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'SerendipityC_to_integradorRectangular', 'source':'SerendipityC', 'target':'integradorRectangular', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'TriangularC_to_integradorTriangular', 'source':'TriangularC', 'target':'integradorTriangular', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'TriangularL_to_integradorTriangular', 'source':'TriangularL', 'target':'integradorTriangular', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'Delaunay1V_to_Geometria', 'source':'Delaunay1V', 'target':'Geometria', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'Rect_to_Geometria', 'source':'Rect', 'target':'Geometria', 'uml_edge_type': 'generalisation'}
+{'type':'edge', 'id':'FEM_to_Elemento', 'source':'FEM', 'target':'Elemento', 'uml_edge_type': 'composition'}
+{'type':'edge', 'id':'FEM_to_Geometria', 'source':'FEM', 'target':'Geometria', 'uml_edge_type': 'composition'}

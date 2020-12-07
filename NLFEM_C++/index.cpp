@@ -21,7 +21,7 @@
 5. grosor (double)
 6. longitud interna (parámetro no-local) (double)
 7. Nombre de la carpeta donde se quiere guardar (Se creara de no existir) (string)
-8. Funcion de atenuación a usar. Entero entre 1 y 3 asi:
+8. Funcion de atenuación a usar. Entero entre 1 y 4 asi:
 	1: Función Biexponencial
 	2: Función Cónica (lineal)
 	3: Función campana (Cuadrática)
