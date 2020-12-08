@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
-
+import matplotlib
 m0 = 6
 l = 0.1
 LR = (m0)*l
@@ -12,7 +11,7 @@ L0_custom = 1/4/np.pi/l/l
 
 
 r = lambda x,y: np.sqrt(x**2+y**2)
-macauley = lambda f, *args: f(*args) + abs(f(*args))
+macauley = lambda f, *args: f(*args)/2 + abs(f(*args))/2
 f1 = lambda x,y: np.exp(-r(x,y)/l)
 f2p = lambda x,y: (1-(r(x,y)/LR))
 f3p = lambda x,y: (1-(r(x,y)**2/LR**2))
@@ -20,7 +19,8 @@ f2 = lambda x,y: macauley(f2p,x,y)
 f3 = lambda x,y: macauley(f3p,x,y)
 f4 = lambda x,y: r(x,y)/l*np.exp(-r(x,y)/l)
 
-L0S = np.array([L0,L0_lineal,L0_cuadratico,L0_custom])
+L0S = np.array([1,1,1,1])
+# L0S = np.array([L0,L0_lineal,L0_cuadratico,L0_custom])
 atenuacion = lambda x,y: np.array([f1(x,y),f2(x,y),f3(x,y),f4(x,y)])*L0S
 
 psis = lambda z,n: np.array([[1/4*(1-z)*(1-n)*(-1-z-n)],[1/4*(1+z)*(1-n)*(-1+z-n)],[1/4*(1+z)*(1+n)*(-1+z+n)],[1/4*(1-z)*(1+n)*(-1-z+n)],[1/2*(1-z**2)*(1-n)],[1/2*(1+z)*(1-n**2)],[1/2*(1-z**2)*(1+n)],[1/2*(1-z)*(1-n**2)]])
@@ -58,7 +58,7 @@ print('')
 print("L0's:")
 print(L0S)
 
-n_puntos = 300
+n_puntos = 100
 Z = np.linspace(-1,1,n_puntos)
 N = np.linspace(-1,1,n_puntos)
 
@@ -76,14 +76,12 @@ print("min(f(x,y))")
 print(np.min(U,axis=0))
 
 lado = int(np.ceil(np.sqrt(n_atenuacion)))
-fig = plt.figure()
 for i in range(n_atenuacion):
-	ax = fig.add_subplot(lado,lado,i+1,projection='3d')
+	fig = plt.figure()
+	ax = fig.add_subplot(projection='3d')
 	surf = ax.plot_trisurf(X,Y,U[:,i],cmap='magma')
-	ax.set_title(r"$\int_{V'}{A(|x-x'|)}{dv'}=$"+'{:.3f}'.format(integral[i])+'\n'+r'$\lambda_0=$'+'{:.3f}'.format(L0S[i]))
 	plt.colorbar(surf)
 	ax.set_xlabel(r'$x$')
 	ax.set_ylabel(r'$y$')
-	ax.set_zlabel(r'$f(x,y)$')
-fig.suptitle('Funciones de Atenuación con:\n'+r'$l=$'+format(l)+'\n'+r'$LR='+format(m0)+'l$')
-plt.show()
+	plt.show()
+# fig.suptitle('Funciones de Atenuación con:\n'+r'$l=$'+format(l)+'\n'+r'$LR='+format(m0)+'l$')

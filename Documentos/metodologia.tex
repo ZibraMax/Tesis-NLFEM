@@ -45,7 +45,7 @@
 	\end{subequations}
 
 		\subsubsection{Método FEM}
-		Se parte de la metodología planteada en \parencite{Reddy} donde se divide el método en 6 pasos:
+		Se parte de la metodología planteada en \textcite{Reddy} donde se divide el método en 6 pasos:
 			\begin{enumerate}
 				\item Enmallado:
 
@@ -72,7 +72,7 @@
 			\begin{enumerate}
 				\item Enmallado
 
-				Uno de los cambios mas relevantes en el proceso de NL-FEM es la inclusión de los elementos no locales por cada elemento local. Para ello, la literatura se propone encontrar los elementos cuyos centroides se encuentren dentro de una distancia de influencia $Lr$ \parencite{article}, sin embargo, \cite{ProgramaEnmallado} sugiere que el proceso de selección de elementos no locales debe tener en cuenta la distancia adicional que se tenga al punto mas alejado del elemento. En la figura \ref{fig:nolocales_lr_cambios} se muestran gráficamente ambos procesos.
+				Uno de los cambios mas relevantes en el proceso de NL-FEM es la inclusión de los elementos no locales por cada elemento local. Para ello, la literatura se propone encontrar los elementos cuyos centroides se encuentren dentro de una distancia de influencia $Lr$ \parencite{article}, sin embargo, \textcite{ProgramaEnmallado} sugiere que el proceso de selección de elementos no locales debe tener en cuenta la distancia adicional que se tenga al punto mas alejado del elemento. En la figura \ref{fig:nolocales_lr_cambios} se muestran gráficamente ambos procesos.
 
 				\begin{figure}
 					\centering
@@ -93,7 +93,7 @@
 
 				La matriz local se obtiene usando la teoría clásica (local) de elasticidad.
 
-				Las matrices no locales se encuentran usando el modelo propuesto por \cite{Pisano2009} donde:
+				Las matrices no locales se encuentran usando el modelo propuesto por \textcite{Pisano2009} donde:
 				\begin{equation}
 					\boldsymbol{k_{nm}^{nloc}}=\int_{V_n}\int_{V_m}{A(|\boldsymbol{x}-\boldsymbol{x'}|/l)\boldsymbol{B_n^T}(\boldsymbol{x})\boldsymbol{D}\boldsymbol{B_n}(\boldsymbol{x})}{dV'}{dV}
 					\label{eq:nl_1}
@@ -108,7 +108,7 @@
 					\item[] $\boldsymbol{x}$ representa un punto del elemento local $n$.
 					\item[] $\boldsymbol{x'}$ representa un punto del elemento no local $m$.
 				\end{enumerate}
-				En la terminología de \cite{Reddy} se puede reescribir esta ecuación a nivel de elemento separando los desplazamientos en x y y en submatrices de la matriz del elemento. Como ejemplo se muestra la matriz $\boldsymbol{K_{uu}}$:
+				En la terminología de \textcite{Reddy} se puede reescribir esta ecuación a nivel de elemento separando los desplazamientos en x y y en submatrices de la matriz del elemento. Como ejemplo se muestra la matriz $\boldsymbol{K_{uu}}$:
 				\begin{equation}
 					\boldsymbol{UU_{nm}^{nloc}}[i,j]=t^2\int_{\Omega_n}\int_{\Omega_m}{A(\rho)\left[C_{11}\frac{\partial \psi_i^{l}}{\partial x}\frac{\partial \psi_j^{nl}}{\partial x}+C_{66}\frac{\partial \psi_i^{l}}{\partial y}\frac{\partial \psi_j^{nl}}{\partial y}\right]}{d\Omega_m}{d\Omega_n}
 				\label{eq:nl_2}
@@ -136,7 +136,7 @@
 
 				El módulo procesador esta escrito en Python y requiere de las librerías \textit{triangle}, \textit{NumPy} y \textit{Matplotilib}. Este módulo se puede encargar de la solución completa de un problema de NL-FEM.
 				Para el enmallado se usa el \textit{wrapper} de \textit{triangle} \parencite{triangle}, que lleva el mismo nombre. Fue desarrollado por \href{https://rufat.be/index.html}{Dzhelil Rufat} y consta de una serie de funciones que realiza triangulaciones \textit{Delauney}. El enmallado por \textit{triangle} no suele ser uniforme, ya que en el proceso los elementos son refinados para obligar a que los ángulos de los triángulos no sean menores a 35 grados.
-				Adicionalmente \cite{ProgramaEnmallado} desarrolló un algoritmo para realizar el proceso de enmallado en dominios rectangulares identificando elementos no locales a una distancia $Lr$. Esto facilitó el proceso de enmallado para los casos de estudio propuestos.
+				Adicionalmente \textcite{ProgramaEnmallado} desarrolló un algoritmo para realizar el proceso de enmallado en dominios rectangulares identificando elementos no locales a una distancia $Lr$. Esto facilitó el proceso de enmallado para los casos de estudio propuestos.
 
 				Para las ecuaciones a nivel de elemento se usa la ecuación \ref{eq:nl_2} y sus variaciones en el anexo \ref{eq:anexos.matrices_elementos}.
 
@@ -181,7 +181,7 @@
 				\begin{enumerate}
 
 					\item Archivo enmallado:
-						Se parte como base del archivo de enmallado del programa de \cite{ProgramaEnmallado} que sigue la estructura de la tabla \ref{tab:estructura_enmallado}. Este archivo es usado por el módulo procesador y el módulo integrador.
+						Se parte como base del archivo de enmallado del programa de \textcite{ProgramaEnmallado} que sigue la estructura de la tabla \ref{tab:estructura_enmallado}. Este archivo es usado por el módulo procesador y el módulo integrador.
 
 						Al ser el archivo principal, lo ideal es generar los archivos de enmallado previamente a realizar el proceso NL-FEM. Por ello, con el enmallado interno de \textit{triangle} se provee una funcionalidad que exporta el archivo de enmallado con el objetivo que el modulo integrador funcione incluso si no se usa un enmallado previamente definido.
 					\item Archivos integración:
@@ -234,7 +234,7 @@
 
 	\subsection{Casos de Estudio}
 	\label{sub:casosestudio}
-	Para poder evaluar el funcionamiento del programa y poder validar los resultados se parte de los casos de estudio propuestos por \cite{Pisano2009}.
+	Para poder evaluar el funcionamiento del programa y poder validar los resultados se parte de los casos de estudio propuestos por \textcite{Pisano2009}.
 
 	\begin{enumerate}
 		\item \textbf{Placa a tensión:}
@@ -243,7 +243,7 @@
 			\centering
 			\sffamily
 			\includegraphics[width=\textwidth]{figuras/placa.pdf}
-			\caption{Modelo de placa a tensión, tomado de \cite{Pisano2009}}
+			\caption{Modelo de placa a tensión, tomado de \textcite{Pisano2009}}
 			\label{fig:placa_tension}
 		\end{figure}
 
@@ -334,7 +334,7 @@
 			\centering
 			\sffamily
 			\includegraphics[width=0.6\textwidth]{figuras/barra.pdf}
-			\caption{Modelo de barra unidimensional tomado de \cite{Pisano2009}}
+			\caption{Modelo de barra unidimensional tomado de \textcite{Pisano2009}}
 			\label{fig:barra_tension}
 		\end{figure}
 
@@ -361,7 +361,7 @@
 	\subsection{Validación}
 	\label{sub:validacion}
 
-	Para realizar la validación de resultados obtenidos, se compararon los perfiles resultantes de correr el programa con los obtenidos por \cite{Pisano2009}. En la figura \ref{fig:perfiles_validacion} se muestran 4 perfiles obtenidos con el caso de estudio 1 usando una malla de 900 elementos, $\zeta_1=0.5$, $l=0.1$. Para comprobar la validez se realizo una superposición de imágenes entre los perfiles obtenidos y los perfiles propuestos por \cite{Pisano2009}. Estas gráficas se encuentran en el anexo \ref{fig:anexos.validacion}
+	Para realizar la validación de resultados obtenidos, se compararon los perfiles resultantes de correr el programa con los obtenidos por \textcite{Pisano2009}. En la figura \ref{fig:perfiles_validacion} se muestran 4 perfiles obtenidos con el caso de estudio 1 usando una malla de 900 elementos, $\zeta_1=0.5$, $l=0.1$. Para comprobar la validez se realizo una superposición de imágenes entre los perfiles obtenidos y los perfiles propuestos por \textcite{Pisano2009}. Estas gráficas se encuentran en el anexo \ref{fig:anexos.validacion}
 
 	\begin{figure}
 	    \centering
