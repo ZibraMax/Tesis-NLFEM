@@ -6,36 +6,36 @@
 \label{sc:teoria}
 
 \subsection{Ecuación Constitutiva}
-Las bases de la teoría no local las sentó \textcite{Kroner1967} en su artículo \textit{\citetitle*{Kroner1967}}. En este, Kroner expone que la energía sobre un cristal cúbico primitivo se debe en parte a las fuerzas de corto alcance y en parte a las fuerzas de largo alcance, de tal manera, Kroner llega a la siguiente ecuación:
+Las bases de la teoría no local las sentó \textcite{Kroner1967} en su artículo \textit{\citetitle*{Kroner1967}}. En este, Kröner expone que la energía sobre un cristal cúbico primitivo se debe en parte a las fuerzas de corto alcance y en parte a las fuerzas de largo alcance, de tal manera, Kröner llega a la siguiente ecuación:
 \begin{equation}
 	E=\frac{1}{2}\left[\int_{V}C_{ijkl}\varepsilon_{ij}(\boldsymbol{x})\varepsilon_{kl}(\boldsymbol{x})dv\right]+\frac{1}{2}\left[\int_{V}\int_{V'}C_{ijkl}(\boldsymbol{x})\varepsilon_{ij}(\boldsymbol{x})\varepsilon_{kl}(\boldsymbol{x'})dv'dv\right]
 \end{equation}
-Por ello, Kroner adopta el término No local para referirse a la interaccion de fuerzas de largo alcance que se representan en el segundo término de la parte derecha de la ecuación.
+Por ello, Kröner adopta el término No local para referirse a la interacción de fuerzas de largo alcance que se representan en el segundo término de la parte derecha de la ecuación.
 
-Con ello, Kroner llegó a la siguiente ecuación constitutiva:
+Con ello, Kröner llegó a la siguiente ecuación constitutiva:
 \begin{equation}
 	\sigma_{ij}(\boldsymbol{x})=C_{ijkl}\varepsilon_{kl}(\boldsymbol{x})+\int_{v'}C_{ijkl}(|\boldsymbol{x}-\boldsymbol{x'}|)\varepsilon_{kl}(\boldsymbol{x})dv'
 \end{equation}
-En esta ecuación, el segundo término representa el aporte no local mientras que el primer término representa el aporte local clásico. Además, se introduce el tensor $C_{ijkl}(|\boldsymbol{x}-\boldsymbol{x'}|)$ llamado el tensor elastico material. Este tensor depende de la distancia entre el punto de interés y los puntos del dominio. En este punto, no existia una manera sencilla de calcular $C_{ijkl}(|\boldsymbol{x}-\boldsymbol{x'}|)$.
+En esta ecuación, el segundo término representa el aporte no local mientras que el primer término representa el aporte local clásico. Además, se introduce el tensor $C_{ijkl}(|\boldsymbol{x}-\boldsymbol{x'}|)$ llamado el tensor elástico material. Este tensor depende de la distancia entre el punto de interés y los puntos del dominio. En este punto, no existía una manera sencilla de calcular $C_{ijkl}(|\boldsymbol{x}-\boldsymbol{x'}|)$.
 
-No fue hasta 5 años despues que \textcite{Eringen1972} desarrollaron un modelo matemático donde se formúla de manera completa la elasticidad no local. De este trabajo nace la teoría lineal en la que \textcite{Eringen1987} describe los dos modelos de elasticidad no local y sus aplicaciones. Los dos modelos son el modelo integral, el cual describe la interacción de fuerzas a larga distancia, y el modelo diferencial que describe interacciones a corta distancia \parencite{Polizzotto2001}. Eringen muestra una gran variedad de problemas que se pueden solucionar con la teoría no local, entre los que destacan la propagación de ondas y el uso de esta teoría en el estudio de fractura y grietas. Esto se debe a que en las puntas de las grietas, la elasticidad local presenta singularidades, obteniendo así un esfuerzo infinto, mientras que en la teoría no local hay un aporte del volumen adyacente, lo cual evita tener esfierzos infinitos \parencite{Eringen1987}. 
+No fue hasta 5 años después que \textcite{Eringen1972} desarrollaron un modelo matemático donde se formula de manera completa la elasticidad no local. De este trabajo nace la teoría lineal en la que \textcite{Eringen1987} describe los dos modelos de elasticidad no local y sus aplicaciones. Los dos modelos son el modelo integral, el cual describe la interacción de fuerzas a larga distancia, y el modelo diferencial que describe interacciones a corta distancia \parencite{Polizzotto2001}. Eringen muestra una gran variedad de problemas que se pueden solucionar con la teoría no local, entre los que destacan la propagación de ondas y el uso de esta teoría en el estudio de fractura y grietas. Esto se debe a que en las puntas de las grietas, la elasticidad local presenta singularidades, obteniendo así un esfuerzo infinito, mientras que en la teoría no local hay un aporte del volumen adyacente, lo cual evita tener esfuerzos infinitos \parencite{Eringen1987}. 
 
-En el trabajo \citetitle*{Eringen1987}, Eringen expone una manera de calcular el tensor elástico material
+En el trabajo \citetitle*{Eringen1987}, Eringen expone una manera de calcular el tensor elástico material.
 \begin{equation}
 	C_{ijkl}(|\boldsymbol{x}-\boldsymbol{x'}|)=\alpha(|\boldsymbol{x}-\boldsymbol{x'}|)C_{ijkl}
 \end{equation}
-Donde se introduce $\alpha$ como la \textit{función de ateniación} (este nombre será modificado posteriormente), por lo que Eringen llega a la siguiente ecuación constitutiva:
+Donde se introduce $\alpha$ como la \textit{función de atenuación} (este nombre será modificado posteriormente), por lo que Eringen llega a la siguiente ecuación constitutiva:
 \begin{equation}
 	\sigma_{ij}(\boldsymbol{x})=\int_{v'}\alpha(|\boldsymbol{x}-\boldsymbol{x'}|)C_{ijkl}\varepsilon_{kl}(\boldsymbol{x'})dv'
 	\label{eq:eringen}
 \end{equation}
-A partir de aqui, se resaltan los trabajos de \textcite{Polizzotto2001} donde reporta que la ecuación constitutiva se escribe con un factor $\zeta_1$ y $\zeta_2$, donde $\zeta_1+\zeta_2=1$ con el objetivo de representar el proceso de deformacion de un sólido con dos fases. Una fase local ($\zeta_1$) y una fase no local ($\zeta_2$).
+A partir de aquí, se resaltan los trabajos de \textcite{Polizzotto2001} donde reporta que la ecuación constitutiva se escribe con un factor $\zeta_1$ y $\zeta_2$, donde $\zeta_1+\zeta_2=1$ con el objetivo de representar el proceso de deformación de un sólido con dos fases. Una fase local ($\zeta_1$) y una fase no local ($\zeta_2$).
 \begin{equation}
 	\sigma_{ij}(\boldsymbol{x})=\zeta_1C_{ijkl}\varepsilon_{kl}(\boldsymbol{x})+\zeta_2\int_{v'}A(|\boldsymbol{x}-\boldsymbol{x'}|)C_{ijkl}\varepsilon_{kl}(\boldsymbol{x'})dv'
 	\label{eq:polizzotto}
 \end{equation}
-Donde $A$ tambien es llamada función de atenuación pero $A\neq\alpha$.
-Para efectos de este estudio se llamará a la función $\alpha$ como funcion de difusión y se llamará a la funcion $A$ función de atenuación.
+Donde $A$ también es llamada función de atenuación pero $A\neq\alpha$.
+Para efectos de este estudio se llamará a la función $\alpha$ como función de difusión y se llamará a la función $A$ función de atenuación.
 
 Por último, en la ecuación \ref{eq:eringen} se tiene dos parámetros locales (Modulo de Young y coeficiente de Poisson) y un parámetro no local (longitud interna $l$), sin embargo, en la ecuación \ref{eq:polizzotto} se cuenta con el parámetro adicional $\zeta_1$.
 \subsection{Funciones de Atenuación y Difusión}
@@ -47,7 +47,7 @@ Las funciones de difusión que expone \textcite{Eringen1987} deben cumplir con u
 \begin{equation}
 	\alpha(0)=1
 \end{equation}
-Adicionalmente, para que exista una única solución, $\alpha>0$ \parencite{ALTAN19891271} 
+Adicionalmente, para que exista una única solución, $\alpha>0$ \parencite{ALTAN19891271}.
 
 Las funciones de atenuación que expone \textcite{Polizzotto2001} deben cumplir con unos requerimientos mínimos que son:
 
@@ -62,15 +62,16 @@ A partir de las ecuaciones \ref{eq:eringen},\ref{eq:polizzotto} \textcite{Polizz
 \begin{equation}
 	\alpha(\rho)=\zeta_1A(\rho)+\zeta_1\delta_{x-x'}
 \end{equation}
-Donde $\rho=\frac{r}{l}$ y $r=|\boldsymbol{x}-\boldsymbol{x'}|$. $r$ es interpretado comúnmente como la distancia euclideana.
+Donde $\rho=\frac{r}{l}$ y $r=|\boldsymbol{x}-\boldsymbol{x'}|$. $r$ es interpretado comúnmente como la distancia euclidiana.
 
-Como lo enuncia \textcite{ALTAN19891271}, $A$ no tiene que ser necesariamente positiva, por lo que se puede elegir de una gran gama de funciones. En este estudio se analizarán 4 funciones de atenuación y su influencia en el los resultados obtenidos variando sus parámetros no locales. Las funciones de atenuación son de la forma:
+Como lo enuncia \textcite{ALTAN19891271}, $A$ no tiene que ser necesariamente positiva, por lo que se puede elegir de una gran gama de funciones. En este estudio se analizarán 4 funciones de atenuación y su influencia en los resultados obtenidos variando sus parámetros no locales. Las funciones de atenuación son de la forma:
 \begin{equation}
 	A(\rho)=\lambda_0f(\rho)
 \end{equation}
-Donde $\lambda_0$ es un factor de corrección para obligar a cumplic con la condicion de $\int_{v^{\infty}}A(|\boldsymbol{x}-\boldsymbol{x'}|)dv'=1$
+Donde $\lambda_0$ es un factor de corrección para obligar a cumplir con la condición de $\int_{v^{\infty}}A(|\boldsymbol{x}-\boldsymbol{x'}|)dv'=1$
 
 En la literatura se exponen varias funciones de atenuación de las que resaltan:
+
 Nota: el paréntesis $<f(x)>$ representa el operador de Macauley.
 \begin{enumerate}
 	\item Función Biexponencial (Función 1)
@@ -144,27 +145,27 @@ Nota: el paréntesis $<f(x)>$ representa el operador de Macauley.
 	\end{figure}
 \end{enumerate}
 
-Cada una de estas funciones tiene unidentificador (Funcion i) que será usado posteriormente en el desarrollo de los programas.
+Cada una de estas funciones tiene un identificador (Función i) que será usado posteriormente en el desarrollo de los programas.
 \subsection{Distancia de influencia \texorpdfstring{$Lr$}{Lr}}
 
-Si se observa el comportamiento de la figura \ref{fig:biexponencial.2d}, se puede apreciar que el valor de la función de atenuación es muy cercana a 0 cuando $|\rho|>=6$. Es por eso que \textcite{Polizzotto2001} define que los efectos no locales solamente se deben tener en cuenta a una distancia máxima $Lr=6l$. Esta afirmación hace que al momento de enmallar un dominio de elementos finitos tenga que tenerse en cuenta una propiedad material ($l$) para poder modelar el problema no local de manera correcta. Para efectos de este estudio se tomará $Lr=6l$. 
+Si se observa el comportamiento de la figura \ref{fig:biexponencial.2d}, se puede apreciar que el valor de la función de atenuación es muy cercana a 0 cuando $|\rho|>=6$. Es por eso que \textcite{Polizzotto2001} define que los efectos no locales solamente se deben tener en cuenta a una distancia máxima $Lr=6l$. Esta afirmación hace que al momento de enmallar un dominio de elementos finitos deba tenerse en cuenta una propiedad material ($l$) para poder modelar el problema no local de manera correcta. Para efectos de este estudio se tomará $Lr=6l$. 
 
 \textcite{Polizzotto2001} propone un parámetro $m_0\geq1$ donde $Lr=(1+m_0)l$. En las figuras \ref{fig:biexponencial.2d} y \ref{fig:biexponencial.2d} se usa dicho parámetro. El parámetro obliga a que $A(\rho)=0$ cuando $|\rho|>(1+m_0)$. Este comportamiento hace que las funciones de atenuación sean comparables entre sí.
 
-\subsection{Factor de correción \texorpdfstring{$\lambda_0$}{λ0}}
+\subsection{Factor de corrección \texorpdfstring{$\lambda_0$}{λ0}}
 
-Una vez definidas las funciones de atenuación, basta con hallar el factor $\lambda_0$ para que se cumpla la condicion de la ecuación \ref{eq:condicion}.
+Una vez definidas las funciones de atenuación, basta con hallar el factor $\lambda_0$ para que se cumpla la condición de la ecuación \ref{eq:condicion}.
 
-Dado que $\lambda_0$ es constante, el proceso para encontrar dicho valor se simplifica. De tal manera, se encuentra el valor de la integral en un dominio circular infinito. Se toma como punto base el origen, ya que, el valor de la integral no depende de la posicion base sino de los puntos adyacentes a esta base.
+Dado que $\lambda_0$ es constante, el proceso para encontrar dicho valor se simplifica. De tal manera, se encuentra el valor de la integral en un dominio circular infinito. Se toma como punto base el origen, ya que, el valor de la integral no depende de la posición base sino de los puntos adyacentes a esta base.
 
 \begin{equation}
 	t\int_{0}^{2\pi}\int_{0}^{\infty}{rA(r/l)}{dr}{d\theta}=1
 \end{equation} 
-Donde $r$ es la distancia euclideana al origen, que en coordenadas polares puede escribirse como el radio.
+Donde $r$ es la distancia euclidiana al origen, que en coordenadas polares puede escribirse como el radio.
 
-Note que esta integral se define como integral de área, sin embargo la integral de la ecuación \ref{eq:condicion} es una integral volumétrica. Se asume un grosor constante por lo que basta con multiplicar por t.
+Note que esta integral se define como integral de área, sin embargo, la integral de la ecuación \ref{eq:condicion} es una integral volumétrica. Se asume un grosor constante por lo que basta con multiplicar por t.
 
-Usando la funcion 1 como referencia se tiene:
+Usando la función 1 como referencia se tiene:
 
 \begin{equation}
 	t\lambda_0\int_{0}^{2\pi}\int_{0}^{\infty}{re^{-r/l}}{dr}{d\theta}=1
@@ -183,7 +184,7 @@ Usando la funcion 1 como referencia se tiene:
 	2\pi\lambda_0l^2t=1
 \end{equation} 
 
-Solucionando para $\lambda_0$
+Solucionando para $\lambda_0$:
 \begin{equation}
 	\lambda_0=\frac{1}{2\pi l^2 t}
 \end{equation} 
@@ -192,12 +193,12 @@ Para las funciones 2 y 3 se debe modificar el proceso así:
 \begin{equation}
 	t\int_{0}^{2\pi}\int_{0}^{\infty}{rA(r/l)}{dr}{d\theta}=t\int_{0}^{2\pi}\int_{0}^{Lr}{rA(r/l)}{dr}{d\theta}+t\int_{0}^{2\pi}\int_{Lr}^{\infty}{rA(r/l)}{dr}{d\theta}
 \end{equation}
-Debido a la definición de la funcion 2 y 3 es evidente que:
+Debido a la definición de la función 2 y 3 es evidente que:
 \begin{equation}
 	t\int_{0}^{2\pi}\int_{Lr}^{\infty}{rA(r/l)}{dr}{d\theta}=0
 \end{equation}
 
-Por lo que el proceso para la funcion 2 y 3 se simplifica a
+Por lo que el proceso para la función 2 y 3 se simplifica a:
 \begin{equation}
 	t\int_{0}^{2\pi}\int_{0}^{Lr}{rA(r/l)}{dr}{d\theta}=1
 \end{equation}
@@ -217,7 +218,7 @@ Para la función 3:
 
 Para comprobar que el proceso se realizó correctamente, se realizo la integración numérica de las funciones de atenuación en un dominio circular. En este ensayo se cambiaron los parámetros $l$ y $m_0$. Estos resultados se exponen en la sección \ref{sc:resultados}.
 
-En este punto, las funciones de atenuación estan completamente definidas. En la figura \ref{fig:atenuacion_completa} se evidencia el comportamiento de dichas funciones cuando varía el parámetro $l$.
+En este punto, las funciones de atenuación están completamente definidas. En la figura \ref{fig:atenuacion_completa} se evidencia el comportamiento de dichas funciones cuando varía el parámetro $l$.
 
 \begin{figure}
     \centering
@@ -264,18 +265,18 @@ Por ello, se definió una función de atenuación la cual cumpla que $A(0)=0$ po
 \begin{equation}
 	A(\rho)=\lambda_0\rho e^{-\rho}
 \end{equation}
-Esta función tiene el comportamiento mostrado en la figura \ref{fig:modificada}
+Esta función tiene el comportamiento mostrado en la figura \ref{fig:modificada}.
 
 \begin{figure}
     \centering
     \sffamily
-    \begin{subfigure}{0.5\textwidth}
+    \begin{subfigure}{0.48\textwidth}
     \centering
         \includegraphics[width=\textwidth]{figuras/modificada3d.pdf}
         \caption{Superficie 3D}
         \label{fig:modificada.3d}
     \end{subfigure}
-    \begin{subfigure}{0.5\textwidth}
+    \begin{subfigure}{0.48\textwidth}
     \centering
         \includegraphics[width=\textwidth]{figuras/modificada2dl.pdf}
         \caption{Corte transversal}
@@ -285,7 +286,7 @@ Esta función tiene el comportamiento mostrado en la figura \ref{fig:modificada}
     \label{fig:modificada}
 \end{figure}
 
-Adicionalmente se encontro que para que se cumpla la ecuación \ref{eq:condicion} se necesita
+Adicionalmente se encontró que para que se cumpla la ecuación \ref{eq:condicion} se necesita:
 \begin{equation}
 	\lambda_0=\frac{1}{4\pi l^2}
 \end{equation}
