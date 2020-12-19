@@ -4,3 +4,15 @@
 
 \section{Introducción}
 \label{sc:intro}
+
+El término \textit{Elasticidad No Local} fue acuñado por \textcite{Kroner1967}, donde se expone que los materiales elásticos poseen fuerzas cohesivas de largo alcance. En sus principios esta teoría se derivó de la teoría \textit{lattice atomic}
+
+Posteriormente, los trabajos de \textcite{Eringen1987} reenfocaron la teoría en un marco termodinámico haciendo posible la obtención de ecuaciones constitutivas para diversas aplicaciones como ondas de superficie, análisis de grietas y \textit{screw dislocation}
+
+De estos trabajos se producen 2 teorías, la teoría no local integral y la teoría no local diferencial. Las cuales muestran efectos no locales fuertes (teoría integral) y débiles (teoría diferencial). En este estudio se trabajará con la teoría integral y por facilidad de lectura se le llamará teoría no local.
+
+El factor común de estas dos teorías es la presencia de una \textit{función de atenuación}, la cual se encarga de representar la interacción y el desvanecimiento de las fuerzas cohesivas de largo alcance. Esta función dependerá de dos parámetros, la longitud interna del material ($l$) y la distancia entre puntos de evaluación.
+
+Gracias a los estudios de \textcite{Polizzotto2001} se conoce una formulación de la teoría no local para elementos finitos comúnmente llamada \textit{NL-FEM} por sus siglas en inglés \textit{Non Local Finite Element Method}. En esta formulación se divide en material en dos fases, una con aportes locales y otra con aportes no locales. En este modelo los aportes no locales se hacen a nivel de elemento, lo que quiere decir que para cada elemento existirá una relación de fuerzas cohesivas con los demás elementos adyacentes. Estos aportes se ponderan con un factor $\zeta$
+
+Debido al comportamiento del método de elementos finitos (FEM desde ahora) se podrían evaluar los aportes locales y no locales sobre un dominio de un elemento. Lo esperado es que sobre este dominio la ponderación de los aportes locales y no locales sean iguales a los aportes de la teoría local. Al momento de aplicar dicho dominio al método se evidencia que dicha ponderación no iguala a la teoría local. Esta diferencia se debe a que al momento de evaluar las matrices de elementos se realizan integrales usando el método de Gauss, lo cual obliga a tener una distancia física entre puntos de evaluación. Esto abre una serie de incógnitas sobre la formulación de las ecuaciones constitutivas en el método NL-FEM.

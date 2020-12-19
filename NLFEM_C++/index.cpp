@@ -104,7 +104,7 @@ vector<Serendipity> leerTexto(string filename,double t,vector<double> PUNTOS, ve
 	ifstream myfile (filename);
 	if (myfile.is_open()) {
 		getline(myfile,line);
-		vector<string> linea = split(line," ");
+		vector<string> linea = split(line,"\t");
 		int NUMERO_GDL = stoi(linea[0]);
 		int NUMERO_ELEMENTOS = stoi(linea[1]);
 		double GDL[NUMERO_GDL][2];
@@ -112,13 +112,13 @@ vector<Serendipity> leerTexto(string filename,double t,vector<double> PUNTOS, ve
 		vector<int> ENL[NUMERO_ELEMENTOS];
 		for (int i = 0; i < NUMERO_GDL; ++i) {
 			getline(myfile,line);
-			vector<string> linea = split(line," ");
+			vector<string> linea = split(line,"\t");
 			GDL[i][0] = stod(linea[0]);
 			GDL[i][1] = stod(linea[1]);
 		}
 		for (int i = 0; i < NUMERO_ELEMENTOS; ++i) {
 			getline(myfile,line);
-			vector<string> linea = split(line," ");
+			vector<string> linea = split(line,"\t");
 			vector<int> elemento;
 			for (int j = 0; j < linea.size(); ++j) {
 				elemento.push_back(stoi(linea[j])-1);

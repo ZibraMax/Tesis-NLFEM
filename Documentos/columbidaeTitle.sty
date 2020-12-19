@@ -1,0 +1,32 @@
+% Copyright note: This package defines how titles should
+% be typeset at the columbidae University
+% Please check for updates
+
+\ProvidesPackage{columbidaeTitle}[2015/08/10 v.01 an example package^^J for wikibooks]
+\RequirePackage{graphicx}
+
+\@ifpackageloaded{geometry}{}{\RequirePackage[pass]{geometry}}
+
+\newcommand*{\project}[1]{\gdef\@project{#1}}
+\newcommand*{\@project}{Final Year Project}
+\newcommand*{\supervisor}[1]{\gdef\@supervisor{#1}}
+\newcommand*{\@supervisor}{\texttt{\string\supervisor} currently not set. Please fix this.}
+\renewcommand*{\maketitle}{%
+  \begin{titlepage}
+  \vspace{1cm}
+  \centering
+  {\sffamily\LARGE Universidad de Los Andes \par}
+  \vspace{1cm}
+  {\sffamily\Large\@project\unskip\strut\par}
+  \vspace{1.5cm}
+  {\huge\bfseries\@title\unskip\strut\par}
+  \vspace{2cm}
+  {\Large\@author\unskip\strut\par}
+  \vfill
+  \Large Supervisado por: \par
+  \@supervisor\unskip\strut\par
+  \vfill
+  {\large \@date\par}
+  \end{titlepage}
+}
+\endinput
