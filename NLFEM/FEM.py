@@ -1,5 +1,6 @@
 import numpy as np
 from IPython.display import clear_output
+from tqdm import tqdm
 
 class FEM:
     def __init__(this,ngdl):
@@ -17,11 +18,13 @@ class FEM:
     def importarGeometria(this,geometria):
         this.geometria = geometria
     def ensamblar(this):
-        for e in this.elementos:
+        print('Ensamblando...')
+        for e in tqdm(this.elementos,unit='Elementos'):
             this.K[np.ix_(e.gdl,e.gdl)] += e.Ke
             this.F[np.ix_(e.gdl)] += e.Fe
             this.Q[np.ix_(e.gdl)] += e.Qe
         this._K = np.copy(this.K)
+        print('Ensamblaje terminado')
     def condicionesFrontera(this):
         for i in this.cbn:
             this.Q[int(i[0])] = i[1]
@@ -36,10 +39,24 @@ class FEM:
         this.S = this.S + this.F + this.Q
         for i in this.cbe:
             this.S[int(i[0])] = i[1]
-    def solucionarSistemaEcuaciones(this):
-        this.U = np.linalg.solve(this.K,this.S)
+    def importarSolucionArchivo(this,ruta=''):
+        this.K = np.zeros([this.n,this.n])
+        this.F = np.zeros([this.n,1])
+        this.Q = np.zeros([this.n,1])
+        this.U = np.zeros([this.n,1])
+        this.S = np.zeros([this.n,1])
+        this.U = np.loadtxt(ruta,delimiter=',').reshape(this.n,1)
         for e in this.elementos:
             e.Ue = this.U[np.ix_(e.gdl)]
+    def solucionarSistemaEcuaciones(this,ruta=''):
+        print('Solucionando sistema de ecuaciones...')
+        this.U = np.linalg.solve(this.K,this.S)
+        if not ruta == '':
+            np.savetxt(ruta,this.U,delimiter=',')
+        for e in this.elementos:
+            e.Ue = this.U[np.ix_(e.gdl)]
+        print('Sistema de ecuaciones solucionado.')
+
     def solucionar(this,plot=True,figsize=[14,12],cmap='magma',markersize=2,linewidth=2,mask=None, **kargs):
         this.generarElementos()
         this.calcularMatrices(**kargs)

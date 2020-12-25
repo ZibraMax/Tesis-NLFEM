@@ -1,8 +1,9 @@
 from .Elemento import *
+import numpy as np
 class integradorTriangular(Elemento):
     def __init__(this,coords,gdl=None,gauss=7):
         super().__init__(coords=coords,gdl=gdl,gauss=7)
-        DENSIDAD = 3
+        DENSIDAD = 5
         trimesh = meshDeFigura([[0,0],[1,0],[0,1]],n=DENSIDAD,dev=False)
         this._dominioNaturalZ = trimesh.x
         this._dominioNaturalN = trimesh.y

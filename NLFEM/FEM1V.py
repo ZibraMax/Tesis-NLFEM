@@ -30,7 +30,7 @@ class FEM1V(FEM):
                     this.elementos.append(TriangularC(coords,np.array(d),gauss=gauss))
                 else:
                     raise 'algo anda mal'
-            elif t == 'C1V':
+            elif t == 'C1V' or t == 'C2V':
                 if len(d) == 8:
                     this.elementos.append(SerendipityC(coords,np.array(d),gauss=gauss))
                 elif len(d) == 4:

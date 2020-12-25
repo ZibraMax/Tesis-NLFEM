@@ -83,7 +83,11 @@ class Elemento:
         fig = plt.figure()
         ax = fig.add_subplot()
         Z = np.zeros(len(X))
-        surf = ax.plot(X, Y, '-o', color='black', markerSize=10)
+        surf = ax.plot(X, Y, '-o', color='black', markersize=10)
+        for i in range(len(this.coords)):
+            ax.annotate(format(i),this.coords[i],xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom')
         ax.set_xlabel(r'$x$')
         ax.set_ylabel(r'$y$')
 

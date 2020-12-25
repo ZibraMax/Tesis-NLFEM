@@ -4,10 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from .Geometria import *
-import pandas as pd
 
 class Delaunay1V(Geometria):
-    def __init__(this, vertices, params, plot=False,texto=10,bolita=0):
+    def __init__(this, vertices, params, plot=False,**kargs):
         this.params = params
         this.cbe = []
         this.cbn = []
@@ -24,9 +23,19 @@ class Delaunay1V(Geometria):
         else:
             tipos[:] = 'T1V'
         gdls = this.triangular['vertices'].tolist()
-        super().__init__(vertices,diccionarios,gdls,tipos,segmentos=this.seg)
+        if 'o2' in params:
+            super().__init__(vertices,diccionarios,gdls,tipos,segmentos=this.seg)
+        else:
+            super().__init__(vertices,diccionarios,gdls,tipos,segmentos=this.seg,_diccionarios=diccionarios)
+        for dicc in this.diccionarios:
+                a1 = dicc[5]
+                a2 = dicc[3]
+                a3 = dicc[4]
+                dicc[3] = a1
+                dicc[4] = a2
+                dicc[5] = a3
         if plot:
-            this.dibujarse(texto)
+            this.dibujarse(**kargs)
 
 def _strdelaunay(constrained=True,delaunay=True,a=None,q=None,o=1):
     p = ''

@@ -9,19 +9,27 @@ class Rect(Geometria):
 		vertices = [-1]
 		segmentos = []
 		with open(file) as archivo:
-			params = archivo.readline().split('	 ')
+			params = archivo.readline().split('\t')
 			ngdls = int(params[0])
 			nele = int(params[1])
 			tipos = np.zeros([nele]).astype(str)
 			tipos[:] = 'C1V'
 			for _ in range(ngdls):
-				linea = archivo.readline().split('	   ')
+				linea = archivo.readline().split('\t')
 				gdls.append([float(linea[0]),float(linea[1])])
-			for _ in range(nele):
-				linea = list(map(lambda x: int(x)-1,archivo.readline().split('	 ')))
+			for i in range(nele):
+				linea = list(map(lambda x: int(x)-1,archivo.readline().split('\t')))
 				diccionarios.append(linea)
+				if len(linea)==3:
+					tipos[i]='T1V'
+				if len(linea)==6:
+					tipos[i]='T2V'
+				if len(linea)==4:
+					tipos[i]='C1V'
+				if len(linea)==8:
+					tipos[i]='C2V'
 			for _ in range(nele):
-				linea = list(map(lambda x: int(x)-1,archivo.readline().split('	')[1:]))
+				linea = list(map(lambda x: int(x)-1,archivo.readline().split('\t')[1:]))
 				diccionariosnl.append(linea)
 		super().__init__(vertices, diccionarios, gdls, tipos)
 		this.diccionariosnl = diccionariosnl

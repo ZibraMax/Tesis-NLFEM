@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 from matplotlib import tri
 import matplotlib as mpl
+import subprocess
 mpl.style.use('default')
+from tqdm import tqdm
 
 from .FEM import *
 from .FEM import progressbar as progressbar
@@ -38,7 +40,7 @@ class NoLocal(FEM):
 					this.elementos.append(TriangularC(coords, d1, gauss=gauss))
 				else:
 					raise 'algo anda mal'
-			elif t == 'C1V':
+			elif t == 'C1V' or t == 'C2V':
 				if len(d) == 8:
 					k = np.array(d)
 					k1 = k * 2
@@ -61,22 +63,6 @@ class NoLocal(FEM):
 		if this.elementos[-1].elementosnl == None:
 			for e in this.elementos:
 				e.elementosnl = np.linspace(0,len(this.elementos)-1,len(this.elementos)).astype(int).tolist()
-	def importarMatricesCarpeta(this,RUTA_M):
-		for i,e in enumerate(this.elementos):
-			n = len(e.coords)
-			K = np.loadtxt(RUTA_M+'/Elemento'+format(i+1)+'/KL_'+format(i+1)+'.csv',delimiter=',').reshape([16,16])
-			Q = np.zeros([2 * n, 1])
-			F = np.zeros([2 * n, 1])
-			e.determinarMatrices(K,F,Q)
-			knls = []
-			j=0
-			KNLS = np.loadtxt(RUTA_M+'/Elemento'+format(i+1)+'/KNLS.csv',delimiter=',')
-			for enl in e.elementosnl:
-				KNL = KNLS[j].reshape([16,16]).T
-				j+=1
-				knls.append(KNL)
-			e.KNLS = knls
-			print('Cargando matrices del elemento ' + format(i))
 		PUNTOS = [-np.sqrt(3.0/5.0),0,np.sqrt(3.0/5.0)]
 		for e in this.elementos:
 			e._dominioNaturalZ = PUNTOS
@@ -86,7 +72,33 @@ class NoLocal(FEM):
 		this.Q = np.zeros([this.n,1])
 		this.U = np.zeros([this.n,1])
 		this.S = np.zeros([this.n,1])
-	def calcularMatrices(this, E, v, Fx, Fy):
+	def importarMatricesCarpeta(this,RUTA_M):
+		print('Importando matrices...')
+		for i,e in tqdm(enumerate(this.elementos),total=len(this.elementos),unit='Elemento'):
+			n = len(e.coords)
+			K = np.loadtxt(RUTA_M+'/Elemento'+format(i+1)+'/KL_'+format(i+1)+'.csv',delimiter=',').reshape([int(2*n),int(2*n)])
+			Q = np.zeros([2 * n, 1])
+			F = np.zeros([2 * n, 1])
+			e.determinarMatrices(K,F,Q)
+			knls = []
+			j=0
+			KNLS = np.loadtxt(RUTA_M+'/Elemento'+format(i+1)+'/KNLS.csv',delimiter=',')
+			for enl in e.elementosnl:
+				KNL = KNLS[j].reshape([int(2*n),int(2*n)]).T
+				j+=1
+				knls.append(KNL)
+			e.KNLS = knls
+		# PUNTOS = [-np.sqrt(3.0/5.0),0,np.sqrt(3.0/5.0)]
+		# for e in this.elementos:
+			# e._dominioNaturalZ = PUNTOS
+			# e._dominioNaturalN = PUNTOS
+		this.K = np.zeros([this.n,this.n])
+		this.F = np.zeros([this.n,1])
+		this.Q = np.zeros([this.n,1])
+		this.U = np.zeros([this.n,1])
+		this.S = np.zeros([this.n,1])
+		print('Las matrices se han cargado con éxito')
+	def calcularMatrices(this, E, v, Fx, Fy, t):
 		distancia = lambda x0, y0, x1, y1: np.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2)
 		count = 0
 		for e in this.elementos:
@@ -117,6 +129,7 @@ class NoLocal(FEM):
 			C11 = E / (1 - v ** 2)
 			C12 = v * E / (1 - v ** 2)
 			C66 = E / 2 / (1 + v)
+			print(J(0,0))
 			for i in range(n):
 				for j in range(n):
 					def dfdx(n,z,k):
@@ -155,6 +168,7 @@ class NoLocal(FEM):
 			K[np.ix_(MD[0], MD[1])] = Kuv
 			K[np.ix_(MD[1], MD[0])] = Kvu
 			K[np.ix_(MD[1], MD[1])] = Kvv
+			np.savetxt(f'KL_{count}.csv',t*K,delimiter=',')
 
 			F[np.ix_(MD[0])] = Fu
 			F[np.ix_(MD[1])] = Fv
@@ -243,8 +257,13 @@ class NoLocal(FEM):
 				Knl.append(Knlmn)
 				progressbar(countnl, len(e.elementosnl), prefix="Integrando elementos No Locales   ", size=50)
 
-			e.determinarMatrices(K, F, Q)
-			e.KNLS = Knl
+			e.determinarMatrices(t*K, F, Q)
+			e.KNLS = t**2*np.array(Knl)
+			KNLS__ = []
+
+			for i in range(len(e.KNLS)):
+				KNLS__.append(e.KNLS[i].T.reshape([1,int(4*n**2)])[0])
+			np.savetxt(f'KNLS_{count}.csv',KNLS__,delimiter=',')
 
 
 	def graficarSolucion(this, figsize=[12, 7], cmap='magma', linewidth=2, markersize=2, mask=None, mult=10):
@@ -303,7 +322,8 @@ class NoLocal(FEM):
 		ytotal = []
 		ztotal = []
 		count = 0
-		for e in this.elementos:
+		print('Graficando deformaciones...')
+		for e in tqdm(this.elementos,unit='Elemento'):
 			count+=1
 			x,y,u = postProcesoX(e,this.U)
 			xtotal.extend(x)
@@ -315,8 +335,47 @@ class NoLocal(FEM):
 		ax.set_ylabel('y')
 		ax.set_zlabel(r'$\varepsilon x$')
 		ax.set_title(r'$\frac{\partial U}{\partial X}$')
-		plt.show()
+		print('Deformaciones graficadas')
+		# plt.show()
 		return xtotal,ytotal,ztotal
+
+	def defUnitariaXMOD(this,x0,xf,xx):
+		count=0
+		fig = plt.figure()
+		ax = fig.add_subplot(projection='3d')
+		markersize = 2
+		cmap = 'magma'
+		linewidth = 2
+		xtotal = []
+		ytotal = []
+		ztotal = []
+		count = 0
+		print('Graficando deformaciones...')
+		for e in tqdm(this.elementos,unit='Elemento'):
+			count+=1
+			x,y,u = postProcesoX(e,this.U)
+			xtotal.extend(x)
+			ytotal.extend(y)
+			ztotal.extend(u)
+		surf = ax.plot_trisurf(xtotal, ytotal, ztotal,cmap=cmap,zorder=1,alpha=0.3)
+		_Y = np.linspace(x0,xf,100).tolist()
+		Z = []
+		Y = []
+		Zlocal = []
+		print('Graficando perfil')
+		for y in tqdm(_Y):
+			for i in range(len(this.elementos)):
+				e = this.elementos[i]
+				if e.estaDentro(y,xx):
+					U = postProcesoXNodos(e,this.U)
+					Y.append(y)
+					Z.append(e.darSolucionXY(U, y, xx, n=100)[0])
+					break
+		ax.plot(Y,[xx]*len(Y),Z)
+
+		ax.set_xlabel('x')
+		ax.set_ylabel('y')
+		print('Deformaciones graficadas')
 	def defUnitariaY(this,figsize):
 		count=0
 		fig = plt.figure(figsize=figsize)
@@ -350,67 +409,78 @@ class NoLocal(FEM):
 	def ensamblar(this):
 		z1 = this.z1
 		z2 = 1- z1
-		for e in this.elementos:
+		print('Ensamblando...')
+		for e in tqdm(this.elementos,unit='Elemento'):
 			this.K[np.ix_(e.gdl,e.gdl)] += e.Ke*z1
 			for i,enl in enumerate(np.array(this.elementos)[e.elementosnl]):
 				this.K[np.ix_(e.gdl,enl.gdl)] += e.KNLS[i]*z2
 			this.F[np.ix_(e.gdl)] += e.Fe
 			this.Q[np.ix_(e.gdl)] += e.Qe
 		this._K = np.copy(this.K)
+		print('Sistema de ecuaciones ensamblado')
+
 
 	def perfilX(Objeto_FEM,x,yi=0.00016,yf=0.0004,x0=0,xf=1,filename='',acum=False,label=''):
 		_Y = np.linspace(x0,xf,100).tolist()
 		Z = []
 		Y = []
 		Zlocal = []
-		for y in _Y:
+		print('Graficando perfil')
+		for y in tqdm(_Y):
 			for i in range(len(Objeto_FEM.elementos)):
 				e = Objeto_FEM.elementos[i]
 				if e.estaDentro(x,y):
+					print(i,x,y)
 					U = postProcesoXNodos(e,Objeto_FEM.U)
-					Y.append(y)
-					Z.append(e.darSolucionXY(U, x, y, n=100))
+					try:
+						Z.append(e.darSolucionXY(U, x, y, n=100))
+						Y.append(y)
+					except:
+						print('No se pudo graficár la coordenada',x,y,"del elemento",i)
 					break
 		plt.plot(Y,Z,label=label)
-
+		print('Perfil graficado')
 
 		if acum:
-			plt.xlim(x0, xf)
-			plt.ylim(yi, yf)
 			plt.grid()
 			plt.legend()
 			plt.xlabel('y')
-		if filename == '':
-			pass
-		else:
-			plt.savefig(filename,transparent=True)
+			if not filename == '':
+				plt.savefig(filename,transparent=True)
+			# plt.show()
 
 	def perfilY(Objeto_FEM,y,yi=0.00016,yf=0.0004,x0=0,xf=50,filename='',acum=False,label=''):
 		_X = np.linspace(x0,xf,100).tolist()
 		Z = []
 		X = []
 		Zlocal = []
-		for x in _X:
+		print('Graficando perfil')
+		for x in tqdm(_X):
 			for i in range(len(Objeto_FEM.elementos)):
 				e = Objeto_FEM.elementos[i]
 				if e.estaDentro(x,y):
+					print(i,x,y)
 					U = postProcesoXNodos(e,Objeto_FEM.U)
-					X.append(x)
-					Z.append(e.darSolucionXY(U, x, y, n=100))
+					try:
+						Z.append(e.darSolucionXY(U, x, y, n=100))
+						X.append(x)
+					except:
+						print('No se pudo graficár la coordenada',x,y,"del elemento",i)
 					break
 		plt.plot(X,Z,label=label)
+		print('Perfil graficado')
 
 		if acum:
-			plt.xlim(x0, xf)
-			plt.ylim(yi, yf)
 			plt.legend()
 			plt.grid()
 			plt.xlabel('x')
-		if filename == '':
-			pass
-		else:
-			plt.savefig(filename,transparent=True)
-
+			if not filename == '':
+				plt.savefig(filename,transparent=True)
+			# plt.show()
+	def moduloIntegrador(this, enmallado,npg,E,V,t,l,RUTA_M,tfa=1):
+		subprocess.run("index.exe"+" "+ enmallado +" "+format(int(npg))+" "+format(E)+" "+format(V)+" "+format(t)+" "+format(l)+" "+RUTA_M+" "+format(int(tfa)), shell=True, check=True)
+	def moduloIntegradorParalelo(this, enmallado,npg,E,V,t,l,RUTA_M,tfa=1):
+		subprocess.Popen("index.exe"+" "+ enmallado +" "+format(int(npg))+" "+format(E)+" "+format(V)+" "+format(t)+" "+format(l)+" "+RUTA_M+" "+format(int(tfa)))
 def postProcesoX(this, U):
 	this.Ue = U[np.ix_(this.gdl)]
 	this._Ue = this.Ue.T[0].tolist()
@@ -448,23 +518,23 @@ def postProcesoY(this, U):
 	x = []
 	y = []
 	u = []
-	this.U = lambda z, n: grad(this, z, n)[1]
 	for z, n in zip(Z, N):
 		x.append(this.Tx(z, n)[0])
 		y.append(this.Ty(z, n)[0])
-		u.append(this.U(z, n)[0])
+		u.append(grad(this, z, n)[1][0])
 	return x, y, u
 
 def grad(this, z, n):
 	dz = this.dzpsis(z, n)
 	dn = this.dnpsis(z, n)
 	result = []
+	_j = this._J(z, n)
 	for i in range(len(dz)):
-		result.append(this._J(z, n) @ np.array([[dz[i][0]], [dn[i][0]]]))
+		result.append(_j @ np.array([[dz[i][0]], [dn[i][0]]]))
 	result = np.array(result)
 	n = len(result)
 	U = np.linspace(0,n-1,n).astype(int)
 	V = U*2+1
 	dx = (this.Ue[np.ix_(U)].T @ result[:, 0])[0]
-	dy = (this.Ue[np.ix_(V)].T @ result[:, 1])[0]
+	dy = (this.Ue[np.ix_(U)].T @ result[:, 1])[0]
 	return np.array([dx, dy])

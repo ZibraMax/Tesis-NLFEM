@@ -2,6 +2,7 @@ import NLFEM
 from NLFEM.Mesh import Rect
 import subprocess
 import matplotlib.pyplot as plt
+import numpy as np
 
 RUTA_M = 'NLFEM_C++/MATRICESPolimorfismo'
 
@@ -13,17 +14,18 @@ t = 0.5
 l = 0.1
 
 GEOMETRIA = Rect.Rect("NLFEM_C++/input.txt")
+# GEOMETRIA.dibujarse()
+# plt.show()
 GEOMETRIA.generarSegmentosDesdeCoordenadas([0,0],[a,0])
 GEOMETRIA.generarSegmentosDesdeCoordenadas([a,0],[a,a])
 GEOMETRIA.generarSegmentosDesdeCoordenadas([a,a],[0,a])
 GEOMETRIA.generarSegmentosDesdeCoordenadas([0,a],[0,0])
 condiciones_borde_escenciales = GEOMETRIA.generarCBdesdeBorde(3,[0,0])+GEOMETRIA.generarCBdesdeBordeX(1,u)
-GEOMETRIA.dibujarse()
-plt.show()
 
 Objeto_FEM = NLFEM.NoLocal(GEOMETRIA)
 Objeto_FEM.z1 = 0.5
 Objeto_FEM.generarElementos()
+# Objeto_FEM.calcularMatrices(E, V, lambda x,y: 0, lambda x,y: 0, t)
 Objeto_FEM.importarMatricesCarpeta(RUTA_M)
 Objeto_FEM.definirCondicionesDeBorde(condiciones_borde_escenciales)
 Objeto_FEM.ensamblar()
@@ -39,21 +41,24 @@ Objeto_FEM_Local.ensamblar()
 Objeto_FEM_Local.condicionesFrontera()
 Objeto_FEM_Local.solucionarSistemaEcuaciones()
 
-# Objeto_FEM.defUnitariaX([10,10])
-# plt.show()
 
-Objeto_FEM.perfilY(0.019,0.00016,0.0004,0,a,label='No Local')
+# Objeto_FEM.elementos[626].dibujarse()
+# plt.show()
+Objeto_FEM_Local.defUnitariaX([10,10])
+plt.show()
+
+# Objeto_FEM.perfilY(0.02,0.00016,0.0004,0,a,label='No Local')
 Objeto_FEM_Local.perfilY(0.019,0.00016,0.0004,0,a,acum=True,label='Local',filename='PerfilY0019.pdf')
 plt.show()
 
-Objeto_FEM.perfilY(2.519,0.00018,0.00028,0,a,label='No Local')
+# Objeto_FEM.perfilY(2.519,0.00018,0.00028,0,a,label='No Local')
 Objeto_FEM_Local.perfilY(2.519,0.00018,0.00028,0,a,acum=True,label='Local',filename='PerfilY2519.pdf')
 plt.show()
 
-Objeto_FEM.perfilX(0.019,0.00016,0.0004,0,a,label='No Local')
+# Objeto_FEM.perfilX(0.019,0.00016,0.0004,0,a,label='No Local')
 Objeto_FEM_Local.perfilX(0.019,0.00016,0.0004,0,a,acum=True,label='Local',filename='PerfilX0019.pdf')
 plt.show()
 
-Objeto_FEM.perfilX(2.519,0.00016,0.0004,0,a,label='No Local')
+# Objeto_FEM.perfilX(2.519,0.00016,0.0004,0,a,label='No Local')
 Objeto_FEM_Local.perfilX(2.519,0.00016,0.0004,0,a,acum=True,label='Local',filename='PerfilX2519.pdf')
 plt.show()

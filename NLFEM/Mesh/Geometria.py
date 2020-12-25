@@ -3,31 +3,69 @@ from ..Utils import isBetween
 import matplotlib.pyplot as plt
 
 class Geometria:
-    def __init__(this, vertices, diccionarios, gdls, tipos, segmentos=[]):
+    def __init__(this, vertices, diccionarios, gdls, tipos, segmentos=[],_diccionarios=[]):
         this.Areas = []
         this.vertices = vertices
         this.diccionarios = diccionarios
         this.gdls = gdls
         this.tipos = tipos
         this.segmentos = segmentos
-        this._diccionarios = []
+        this._diccionarios = _diccionarios
         this.cbe = []
         this.cbn = []
+        this.diccionariosnl = []
         this.centroideYArea()
 
+    def detectarNoLocales(this,lr):
+        this.diccionariosnl = []
+        for i in range(len(this.diccionarios)):
+            cxl,cyl = this.centroides[i]
+            linea = []
+            linea.append(i)
+            for j in range(len(this.diccionarios)):
+                if not j == i:
+                    cxnl,cynl = this.centroides[j]
+                    d = ((cxl-cxnl)**2+(cyl-cynl)**2)**0.5
+                    if d<=lr:
+                        linea.append(j)
+            this.diccionariosnl.append(linea)  
+    def guardarArchivoEnmallado(this,filename='input.txt'):
+        f = open(filename,'w')
+        f.write(format(len(this.gdls))+'\t'+format(len(this.diccionarios))+'\n')
+        for i in range(len(this.gdls)):
+            f.write(format(this.gdls[i][0])+'\t'+format(this.gdls[i][1])+'\n')
+        for i in range(len(this.diccionarios)):
+            f.write('\t'.join(map(lambda x: str(int(x+1)),this.diccionarios[i]))+'\n')
+        for i in range(len(this.diccionariosnl)):
+            f.write(format(int(len(this.diccionariosnl[i])))+'\t'+'\t'.join(map(lambda x: str(int(x+1)),this.diccionariosnl[i]))+'\n')
+        f.close()
+        print('Archivo '+ filename + ' Guardado')
+
+    def animacionNoLocal(this):
+        plt.ion()
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(np.array(this.gdls)[:,0],np.array(this.gdls)[:,1],'.',color='black')
+        ax.set_aspect('equal')
+        for elemento in range(len(this.diccionarios)):
+            for j,enl in enumerate(this.diccionariosnl[elemento]):
+                coords = np.array(this.gdls)[np.ix_(this._diccionarios[enl])]
+                _x = coords[:, 0]
+                _y = coords[:, 1]
+                if j==0:
+                    ax.fill(_x,_y,color='red')
+                else:
+                    ax.fill(_x,_y,color='blue')
+            fig.canvas.draw()
+            fig.canvas.flush_events()
+            ax.patches=[]
     def centroideYArea(this):
         for i,e in enumerate(this.diccionarios):
             if this.tipos[i]=='T2V':
-                f4 = e[5]
-                f5 = e[3]
-                f6 = e[4]
-                e[3] = f4
-                e[4] = f5
-                e[5] = f6
                 this._diccionarios.append([e[0],e[1],e[2]])
-            elif this.tipos[i]=='C1V':
+            elif this.tipos[i]=='C2V':
                 this._diccionarios.append([e[0],e[1],e[2],e[3]])
-        this.Centroides = []
+        this.centroides = []
         for i, e in enumerate(this._diccionarios):
             coords = np.array(this.gdls)[np.ix_(e)]
             coords = np.array(coords.tolist() + [coords[0].tolist()])
@@ -40,7 +78,7 @@ class Geometria:
                 cx += (coords[j][0]+coords[j+1][0])*mult
                 cy += (coords[j][1]+coords[j+1][1])*mult
             this.Areas.append(np.abs(area/2))
-            this.Centroides.append([cx/3/area,cy/3/area])
+            this.centroides.append([cx/3/area,cy/3/area])
     def generarSegmentosDesdeCoordenadas(this,p0,p1):
         masCercano1 = None
         d1 = np.Inf
@@ -84,20 +122,11 @@ class Geometria:
     def definirTodasCondiciones(this):
         for s in range(len(this.segmentos)):
             this.cbe += this.generarCBdesdeBorde(s)
-    def generarCBdesdeBordeX(this, borde, valor=0):
+    def generarCBdesdeBorde(this, borde, valor=0):
         cb = []
         nodos = this.darNodosCB(borde)
         cbe = np.zeros([len(nodos), 2])
-        cbe[:, 0] = nodos * 2
-        cbe[:, 1] = valor
-        cb += cbe.tolist()
-        return cb
-
-    def generarCBdesdeBordeY(this, borde, valor=0):
-        cb = []
-        nodos = this.darNodosCB(borde)
-        cbe = np.zeros([len(nodos), 2])
-        cbe[:, 0] = nodos * 2 + 1
+        cbe[:, 0] = nodos
         cbe[:, 1] = valor
         cb += cbe.tolist()
         return cb
@@ -114,8 +143,8 @@ class Geometria:
             X = coords[:, 0]
             Y = coords[:, 1]
             ax.plot(X, Y, 'o-', color='black', zorder=-10)
-            cx = this.Centroides[i][0]
-            cy = this.Centroides[i][1]
+            cx = this.centroides[i][0]
+            cy = this.centroides[i][1]
             ax.plot(cx, cy, 'o', markersize=texto + bolita, color='yellow')
             ax.annotate(format(i), [cx, cy], size=texto, textcoords="offset points", xytext=(-0, -2.5), ha='center')
         try:
@@ -151,4 +180,3 @@ class Geometria:
 
         for p, l in zip(gdls, labels):
             ax.annotate(l, p, size=texto, textcoords="offset points", xytext=(-0, -2.5), ha='center')
-        plt.show()
