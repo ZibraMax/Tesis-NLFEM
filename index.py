@@ -2,6 +2,7 @@ import NLFEM
 from NLFEM.Mesh import Rect
 import subprocess
 import matplotlib.pyplot as plt
+import numpy as np
 
 RUTA_M = 'NLFEM_C++/MATRICESPolimorfismo'
 
@@ -39,21 +40,21 @@ Objeto_FEM_Local.ensamblar()
 Objeto_FEM_Local.condicionesFrontera()
 Objeto_FEM_Local.solucionarSistemaEcuaciones()
 
-# Objeto_FEM.defUnitariaX([10,10])
-# plt.show()
+Objeto_FEM.defUnitariaX([10,10])
+plt.show()
 
 Objeto_FEM.perfilY(0.019,0.00016,0.0004,0,a,label='No Local')
-Objeto_FEM_Local.perfilY(0.019,0.00016,0.0004,0,a,acum=True,label='Local',filename='PerfilY0019.pdf')
+Objeto_FEM_Local.perfilY(0.019,0.00016,0.0004,0,a,acum=True,label='Local')
 plt.show()
 
 Objeto_FEM.perfilY(2.519,0.00018,0.00028,0,a,label='No Local')
-Objeto_FEM_Local.perfilY(2.519,0.00018,0.00028,0,a,acum=True,label='Local',filename='PerfilY2519.pdf')
+Objeto_FEM_Local.perfilY(2.519,0.00018,0.00028,0,a,acum=True,label='Local')
 plt.show()
 
 Objeto_FEM.perfilX(0.019,0.00016,0.0004,0,a,label='No Local')
-Objeto_FEM_Local.perfilX(0.019,0.00016,0.0004,0,a,acum=True,label='Local',filename='PerfilX0019.pdf')
+Objeto_FEM_Local.perfilX(0.019,0.00016,0.0004,0,a,acum=True,label='Local')
 plt.show()
 
 Objeto_FEM.perfilX(2.519,0.00016,0.0004,0,a,label='No Local')
-Objeto_FEM_Local.perfilX(2.519,0.00016,0.0004,0,a,acum=True,label='Local',filename='PerfilX2519.pdf')
+Objeto_FEM_Local.perfilX(2.519,0.00016,0.0004,0,a,acum=True,label='Local')
 plt.show()

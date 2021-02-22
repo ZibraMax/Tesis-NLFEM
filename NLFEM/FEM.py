@@ -63,7 +63,7 @@ class FEM:
         print('Ensamblando sistema de ecuaciones')
         this.ensamblar()
         print('Definiendo condiciones deborde')
-        this.condicionesFrontera(this.cbe,this.cbn)
+        this.condicionesFrontera()
         print('Solucionando sistema de ecuaciones')
         this.solucionarSistemaEcuaciones()
         if plot:

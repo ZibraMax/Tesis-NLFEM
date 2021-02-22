@@ -3,14 +3,14 @@ from ..Utils import isBetween
 import matplotlib.pyplot as plt
 
 class Geometria:
-    def __init__(this, vertices, diccionarios, gdls, tipos, segmentos=[],_diccionarios=[]):
+    def __init__(this, vertices, diccionarios, gdls, tipos, segmentos=[]):
         this.Areas = []
         this.vertices = vertices
         this.diccionarios = diccionarios
         this.gdls = gdls
         this.tipos = tipos
         this.segmentos = segmentos
-        this._diccionarios = _diccionarios
+        this._diccionarios = []
         this.cbe = []
         this.cbn = []
         this.diccionariosnl = []
@@ -65,6 +65,8 @@ class Geometria:
                 this._diccionarios.append([e[0],e[1],e[2]])
             elif this.tipos[i]=='C2V':
                 this._diccionarios.append([e[0],e[1],e[2],e[3]])
+            else:
+                this._diccionarios.append(e)
         this.centroides = []
         for i, e in enumerate(this._diccionarios):
             coords = np.array(this.gdls)[np.ix_(e)]

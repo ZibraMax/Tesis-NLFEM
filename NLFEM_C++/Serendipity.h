@@ -46,43 +46,4 @@ class Serendipity : public Elemento {
 				}
 			}
 		}
-		vector<double> psis(double z, double n) {
-			vector<double> foo{
-				1.0/4.0*(1.0-z)*(1.0-n)*(-1.0-z-n),
-				1.0/4.0*(1.0+z)*(1.0-n)*(-1.0+z-n),
-				1.0/4.0*(1.0+z)*(1.0+n)*(-1.0+z+n),
-				1.0/4.0*(1.0-z)*(1.0+n)*(-1.0-z+n),
-				1.0/2.0*(1.0-z*z)*(1.0-n),
-				1.0/2.0*(1.0+z)*(1.0-n*n),
-				1.0/2.0*(1.0-z*z)*(1.0+n),
-				1.0/2.0*(1.0-z)*(1.0-n*n)
-				};
-			return foo;
-		}
-		vector<double> dzpsis(double z, double n) {
-			vector<double> foo{
-				-1.0/4.0*(n-1.0)*(2.0*z+n),
-				-1.0/4.0*(n-1.0)*(2.0*z-n),
-				1.0/4.0*(n+1.0)*(2.0*z+n),
-				1.0/4.0*(n+1.0)*(2.0*z-n),
-				(n-1.0)*z,
-				-1.0/2.0*(n*n-1.0),
-				-(n+1.0)*z,
-				1.0/2.0*(n*n-1.0)
-				};
-			return foo;
-		}
-		vector<double> dnpsis(double z, double n) {
-			vector<double> foo{
-				-1.0/4.0*(z-1.0)*(2.0*n+z),
-				1.0/4.0*(z+1.0)*(2.0*n-z),
-				1.0/4.0*(z+1.0)*(2.0*n+z),
-				-1.0/4.0*(z-1.0)*(2.0*n-z),
-				1.0/2.0*(z*z-1.0),
-				-n*(z+1.0),
-				-1.0/2.0*(z*z-1.0),
-				n*(z-1.0)
-				};
-			return foo;
-		}
 };

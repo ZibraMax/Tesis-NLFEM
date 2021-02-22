@@ -47,37 +47,4 @@ class TriangularC : public Elemento {
 				PUNTOS.push_back(puntoi);
 			}
 		}
-		vector<double> psis(double z, double n) {
-			vector<double> foo{
-				2.0*(z+n-1.0)*(z+n-1.0/2.0),
-				2.0*z*(z-1.0/2.0),
-				2.0*n*(n-1.0/2.0),
-				-4.0*(z+n-1.0)*(z),
-				4.0*z*n,
-				-4.0*n*(z+n-1.0)
-				};
-			return foo;
-		}
-		vector<double> dzpsis(double z, double n) {
-			vector<double> foo{
-				4.0*z+4.0*n-3.0,
-				4.0*z-1.0,
-				0.0,
-				-8.0*z-4.0*(n-1.0),
-				4.0*n,
-				-4.0*n
-				};
-			return foo;
-		}
-		vector<double> dnpsis(double z, double n) {
-			vector<double> foo{
-				4.0*n+4.0*z-3.0,
-				0.0,
-				4.0*n-1.0,
-				-4.0*z,
-				4.0*z,
-				-8.0*n-4.0*z+4.0
-				};
-			return foo;
-		}
 };

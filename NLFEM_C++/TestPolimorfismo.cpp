@@ -69,6 +69,8 @@
 #include <vector>
 #include "Serendipity.h"
 #include "TriangularC.h"
+#include "TriangularL.h"
+#include "Rectangular.h"
 #include <cstdlib>
 #include <cmath>
 #include <sys/stat.h>
@@ -138,6 +140,10 @@ vector<Elemento*> leerTexto(string filename,double t,vector<double> PUNTOS, vect
 				ELEMENTOS.push_back(new Serendipity(elementos[i],nolocales,GDL,PUNTOS,PESOS,t));
 			} else if (elementos[i].size()==6) {
 				ELEMENTOS.push_back(new TriangularC(elementos[i],nolocales,GDL,PUNTOS,PESOS,t));
+			} else if (elementos[i].size()==3) {
+				ELEMENTOS.push_back(new TriangularL(elementos[i],nolocales,GDL,PUNTOS,PESOS,t));
+			} else if (elementos[i].size()==4) {
+				ELEMENTOS.push_back(new Rectangular(elementos[i],nolocales,GDL,PUNTOS,PESOS,t));
 			} else {
 				cout<<"Error al cargar el elemento " <<i<<endl;
 			}

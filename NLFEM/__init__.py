@@ -7,3 +7,4 @@ from .TriangularC import *
 from .TriangularL import *
 from .FEM import *
 from .NoLocal import *
+from .FEM1V import *

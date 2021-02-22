@@ -7,6 +7,9 @@ class TriangularL(integradorTriangular):
             this.psis = lambda z,n: np.array([[1-z-n],[z],[n]])
             this.dzpsis = lambda z,n: np.array([[-1],[1],[0]])
             this.dnpsis = lambda z,n: np.array([[-1],[0],[1]])
+            this.psi = np.array([lambda z,n: 1-z-n,lambda z,n: z, lambda z,n: n])
+            this.dzpsi = np.array([lambda z,n: -1, lambda z,n: 1, lambda z,n:0])
+            this.dnpsi = np.array([lambda z,n:-1,lambda z,n:0,lambda z,n:1])
         else:
             raise Exception('Error: Se esta intentando crear un elemento triangualar que no tiene 3 coordenadas. '+'Recuerde que se necesitan de 3 corrdenadas en orden contrario de las manecillas del reloj '+'sin repetir la primera coordenada')
         super().__init__(coords=coords,gdl=gdl,gauss=gauss)

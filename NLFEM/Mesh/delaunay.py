@@ -23,17 +23,15 @@ class Delaunay1V(Geometria):
         else:
             tipos[:] = 'T1V'
         gdls = this.triangular['vertices'].tolist()
-        if 'o2' in params:
-            super().__init__(vertices,diccionarios,gdls,tipos,segmentos=this.seg)
-        else:
-            super().__init__(vertices,diccionarios,gdls,tipos,segmentos=this.seg,_diccionarios=diccionarios)
-        for dicc in this.diccionarios:
-                a1 = dicc[5]
-                a2 = dicc[3]
-                a3 = dicc[4]
-                dicc[3] = a1
-                dicc[4] = a2
-                dicc[5] = a3
+        super().__init__(vertices,diccionarios,gdls,tipos,segmentos=this.seg)
+        if tipos[0] == 'T2V':
+            for dicc in this.diccionarios:
+                    a1 = dicc[5]
+                    a2 = dicc[3]
+                    a3 = dicc[4]
+                    dicc[3] = a1
+                    dicc[4] = a2
+                    dicc[5] = a3
         if plot:
             this.dibujarse(**kargs)
 

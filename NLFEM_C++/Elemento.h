@@ -42,17 +42,15 @@ class Elemento {
 		}
 		double TX(double z,double n) {
 			double res = 0;
-			vector<double> psiszn = psis(z,n);
-			for (int i = 0; i < psiszn.size(); ++i) {
-				res+=X[i]*psiszn[i];
+			for (int i = 0; i < psi.size(); ++i) {
+				res+=X[i]*psi[i](z,n);
 			}
 			return res;
 		}
 		double TY(double z,double n) { 
 			double res = 0;
-			vector<double> psiszn = psis(z,n);
-			for (int i = 0; i < psiszn.size(); ++i) {
-				res+=Y[i]*psiszn[i];
+			for (int i = 0; i < psi.size(); ++i) {
+				res+=Y[i]*psi[i](z,n);
 			}
 			return res;
 		}
@@ -64,22 +62,16 @@ class Elemento {
 			}
 			return v;
 		}
-		virtual vector<double> psis(double z, double n) = 0;
-		virtual vector<double> dzpsis(double z, double n) = 0;
-		virtual vector<double> dnpsis(double z, double n) = 0;
-
 		vector<double> transfCoordenadas(double z,double n) {
 			double dxdz = 0.0;
 			double dydz = 0.0;
 			double dxdn = 0.0;
 			double dydn = 0.0;
-			vector<double> dzpsis_zn = dzpsis(z,n);
-			vector<double> dnpsis_zn = dnpsis(z,n);
 			for (int i = 0; i < coords.size(); ++i) {
-				dxdz += X[i]*dzpsis_zn[i];
-				dydz += Y[i]*dzpsis_zn[i];
-				dxdn += X[i]*dnpsis_zn[i];
-				dydn += Y[i]*dnpsis_zn[i];
+				dxdz += X[i]*dzpsi[i](z,n);
+				dydz += Y[i]*dzpsi[i](z,n);
+				dxdn += X[i]*dnpsi[i](z,n);
+				dydn += Y[i]*dnpsi[i](z,n);
 			}
 			J = {{dxdz,dydz},{dxdn,dydn}};
 			double determinanteJ = dxdz*dydn-dydz*dxdn;
@@ -116,6 +108,8 @@ class Elemento {
 						vector<double> jacobianos;
 
 						jacobianos = transfCoordenadas(z,n);
+
+						// cout<<jacobianos[0]<<","<<jacobianos[1]<<endl;
 
 						double detjac = jacobianos[0];
 
