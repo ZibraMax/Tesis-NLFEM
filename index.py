@@ -4,9 +4,9 @@ import subprocess
 import matplotlib.pyplot as plt
 import numpy as np
 
-RUTA_M = 'NLFEM_C++/MATRICESPolimorfismo'
+RUTA_M = 'PARCIAL'
 
-E = 2.1*10**6
+E = 2.0*10**6
 V = 0.2
 u = 0.001
 a = 5
@@ -14,11 +14,12 @@ t = 0.5
 l = 0.1
 
 GEOMETRIA = Rect.Rect("NLFEM_C++/input.txt")
-GEOMETRIA.generarSegmentosDesdeCoordenadas([0,0],[a,0])
-GEOMETRIA.generarSegmentosDesdeCoordenadas([a,0],[a,a])
-GEOMETRIA.generarSegmentosDesdeCoordenadas([a,a],[0,a])
-GEOMETRIA.generarSegmentosDesdeCoordenadas([0,a],[0,0])
-condiciones_borde_escenciales = GEOMETRIA.generarCBdesdeBorde(3,[0,0])+GEOMETRIA.generarCBdesdeBordeX(1,u)
+GEOMETRIA.generarSegmentosDesdeCoordenadas([0, 0], [a, 0])
+GEOMETRIA.generarSegmentosDesdeCoordenadas([a, 0], [a, a])
+GEOMETRIA.generarSegmentosDesdeCoordenadas([a, a], [0, a])
+GEOMETRIA.generarSegmentosDesdeCoordenadas([0, a], [0, 0])
+condiciones_borde_escenciales = GEOMETRIA.generarCBdesdeBorde(
+    3, [0, 0])+GEOMETRIA.generarCBdesdeBordeX(1, u)
 GEOMETRIA.dibujarse()
 plt.show()
 
@@ -40,21 +41,26 @@ Objeto_FEM_Local.ensamblar()
 Objeto_FEM_Local.condicionesFrontera()
 Objeto_FEM_Local.solucionarSistemaEcuaciones()
 
-Objeto_FEM.defUnitariaX([10,10])
+Objeto_FEM.defUnitariaX([10, 10])
 plt.show()
 
-Objeto_FEM.perfilY(0.019,0.00016,0.0004,0,a,label='No Local')
-Objeto_FEM_Local.perfilY(0.019,0.00016,0.0004,0,a,acum=True,label='Local')
+x, y = Objeto_FEM.perfilY(0.019, 0.00016, 0.0004, 0, a, label='No Local')
+np.savetxt('a.csv', [x, y], delimiter=',')
+Objeto_FEM_Local.perfilY(0.019, 0.00016, 0.0004, 0,
+                         a, acum=True, label='Local')
 plt.show()
 
-Objeto_FEM.perfilY(2.519,0.00018,0.00028,0,a,label='No Local')
-Objeto_FEM_Local.perfilY(2.519,0.00018,0.00028,0,a,acum=True,label='Local')
+Objeto_FEM.perfilY(2.519, 0.00018, 0.00028, 0, a, label='No Local')
+Objeto_FEM_Local.perfilY(2.519, 0.00018, 0.00028, 0,
+                         a, acum=True, label='Local')
 plt.show()
 
-Objeto_FEM.perfilX(0.019,0.00016,0.0004,0,a,label='No Local')
-Objeto_FEM_Local.perfilX(0.019,0.00016,0.0004,0,a,acum=True,label='Local')
+Objeto_FEM.perfilX(0.019, 0.00016, 0.0004, 0, a, label='No Local')
+Objeto_FEM_Local.perfilX(0.019, 0.00016, 0.0004, 0,
+                         a, acum=True, label='Local')
 plt.show()
 
-Objeto_FEM.perfilX(2.519,0.00016,0.0004,0,a,label='No Local')
-Objeto_FEM_Local.perfilX(2.519,0.00016,0.0004,0,a,acum=True,label='Local')
+Objeto_FEM.perfilX(2.519, 0.00016, 0.0004, 0, a, label='No Local')
+Objeto_FEM_Local.perfilX(2.519, 0.00016, 0.0004, 0,
+                         a, acum=True, label='Local')
 plt.show()

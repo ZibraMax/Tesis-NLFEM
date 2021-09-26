@@ -6,7 +6,6 @@
 // Librerias Requeridas:
 // Eigen (paquete de algebra lineal para C++)
 
-
 // Inputs:
 
 /* Argumentos de entrada (por consola separados por espacio): 
@@ -72,210 +71,254 @@
 #include <cmath>
 #include <sys/stat.h>
 #include "Eigen/Dense"
-#include <chrono> 
+#include <chrono>
 #include <iomanip>
 #include <limits>
 #include "legendre.h"
-
 
 using namespace std::chrono;
 using namespace Eigen;
 using namespace std;
 
-vector<string> split(const string& str, const string& delim)
+vector<string> split(const string &str, const string &delim)
 {
 	vector<string> tokens;
 	size_t prev = 0, pos = 0;
 	do
 	{
 		pos = str.find(delim, prev);
-		if (pos == string::npos) pos = str.length();
-		string token = str.substr(prev, pos-prev);
-		if (!token.empty()) tokens.push_back(token);
+		if (pos == string::npos)
+			pos = str.length();
+		string token = str.substr(prev, pos - prev);
+		if (!token.empty())
+			tokens.push_back(token);
 		prev = pos + delim.length();
-	}
-	while (pos < str.length() && prev < str.length());
+	} while (pos < str.length() && prev < str.length());
 	return tokens;
 }
 
-vector<Serendipity> leerTexto(string filename,double t,vector<double> PUNTOS, vector<double> PESOS) {
+vector<Serendipity> leerTexto(string filename, double t, vector<double> PUNTOS, vector<double> PESOS)
+{
 	vector<Serendipity> ELEMENTOS;
 	string line;
-	ifstream myfile (filename);
-	if (myfile.is_open()) {
-		getline(myfile,line);
-		vector<string> linea = split(line,"\t");
+	ifstream myfile(filename);
+	if (myfile.is_open())
+	{
+		getline(myfile, line);
+		vector<string> linea = split(line, "\t");
 		int NUMERO_GDL = stoi(linea[0]);
 		int NUMERO_ELEMENTOS = stoi(linea[1]);
 		double GDL[NUMERO_GDL][2];
 		vector<vector<int>> elementos;
 		vector<int> ENL[NUMERO_ELEMENTOS];
-		for (int i = 0; i < NUMERO_GDL; ++i) {
-			getline(myfile,line);
-			vector<string> linea = split(line,"\t");
+		for (int i = 0; i < NUMERO_GDL; ++i)
+		{
+			getline(myfile, line);
+			vector<string> linea = split(line, "\t");
 			GDL[i][0] = stod(linea[0]);
 			GDL[i][1] = stod(linea[1]);
 		}
-		for (int i = 0; i < NUMERO_ELEMENTOS; ++i) {
-			getline(myfile,line);
-			vector<string> linea = split(line,"\t");
+		for (int i = 0; i < NUMERO_ELEMENTOS; ++i)
+		{
+			getline(myfile, line);
+			vector<string> linea = split(line, "\t");
 			vector<int> elemento;
-			for (int j = 0; j < linea.size(); ++j) {
-				elemento.push_back(stoi(linea[j])-1);
+			for (int j = 0; j < linea.size(); ++j)
+			{
+				elemento.push_back(stoi(linea[j]) - 1);
 			}
 			elementos.push_back(elemento);
 		}
-		for (int i = 0; i < NUMERO_ELEMENTOS; ++i) {
-			getline(myfile,line);
-			vector<string> linea = split(line,"\t");
+		for (int i = 0; i < NUMERO_ELEMENTOS; ++i)
+		{
+			getline(myfile, line);
+			vector<string> linea = split(line, "\t");
 			int L = stoi(linea[0]);
 			vector<int> nolocales;
-			for (int j = 1; j <= L; ++j) {
-				nolocales.push_back(stoi(linea[j])-1);
+			for (int j = 1; j <= L; ++j)
+			{
+				nolocales.push_back(stoi(linea[j]) - 1);
 			}
-			ELEMENTOS.push_back(Serendipity(elementos[i],nolocales,GDL,PUNTOS,PESOS,t));
+			ELEMENTOS.push_back(Serendipity(elementos[i], nolocales, GDL, PUNTOS, PESOS, t));
 		}
 		myfile.close();
 	}
-	else cout << "Unable to open file";
+	else
+		cout << "Unable to open file";
 	return ELEMENTOS;
 }
 
 //Función de atenuación que se usará
-double atenuacion(double x,double y,double xnl,double ynl,double L0,double l) {
-	double distancia = sqrt(pow((x-xnl),2)+pow((y-ynl),2));
-	return L0*exp(-distancia/l);
+double atenuacion(double x, double y, double xnl, double ynl, double L0, double l)
+{
+	double distancia = sqrt(pow((x - xnl), 2) + pow((y - ynl), 2));
+	return L0 * exp(-distancia / l);
 }
-double atenuacion_biexponencial_modificada(double x,double y,double xnl,double ynl,double L0,double l) {
-	double distancia = sqrt(pow((x-xnl),2)+pow((y-ynl),2));
-	return L0*distancia/l*exp(-distancia/l);
+double atenuacion_biexponencial_modificada(double x, double y, double xnl, double ynl, double L0, double l)
+{
+	double distancia = sqrt(pow((x - xnl), 2) + pow((y - ynl), 2));
+	return L0 * distancia / l * exp(-distancia / l);
 }
-double atenuacion_lineal(double x,double y,double xnl,double ynl,double L0,double LR) {
-	double r = sqrt(pow((x-xnl),2)+pow((y-ynl),2));
-	return (r/LR) > 1 ? 0 : L0*(1-(r/LR));
+double atenuacion_lineal(double x, double y, double xnl, double ynl, double L0, double LR)
+{
+	double r = sqrt(pow((x - xnl), 2) + pow((y - ynl), 2));
+	return (r / LR) > 1 ? 0 : L0 * (1 - (r / LR));
 }
-double atenuacion_cuadratica(double x,double y,double xnl,double ynl,double L0,double LR) {
-	double r = sqrt(pow((x-xnl),2)+pow((y-ynl),2));
-	return (pow(r,2)/pow(LR,2)) > 1 ? 0 : L0*(1-(pow(r,2)/pow(LR,2)));
+double atenuacion_cuadratica(double x, double y, double xnl, double ynl, double L0, double LR)
+{
+	double r = sqrt(pow((x - xnl), 2) + pow((y - ynl), 2));
+	return (pow(r, 2) / pow(LR, 2)) > 1 ? 0 : L0 * (1 - (pow(r, 2) / pow(LR, 2)));
 }
-int main (int argc, char const *argv[]) {
 
-	cout<<"NLFEM-C++"<<endl;
-	cout << "================================" <<endl;
+double atenuacion_4(double x, double y, double xnl, double ynl, double L0, double LR)
+{
+	double r = sqrt(pow((x - xnl), 2) + pow((y - ynl), 2));
+	// PI_calc
+	return (r / LR) > 1 ? 0 : L0 * (1 - (pow(r, 2) / pow(LR, 2)));
+}
+int main(int argc, char const *argv[])
+{
+
+	cout << "NLFEM-C++" << endl;
+	cout << "================================" << endl;
 	int NG = stoi(argv[2]);
-	cout << "Encontrando puntos y pesos de Gauss" <<endl;
+	cout << "Encontrando puntos y pesos de Gauss" << endl;
 	vector<double> PUNTOS = darPuntos(NG);
 	vector<double> PESOS = darPesos(NG);
-	cout << "Puntos y pesos encontrados (" << NG << "):" <<endl;
-	for (int i = 0; i < NG; ++i) {
-		cout << "Z"<<i<<"=" << PUNTOS[i] << ", W"<<i<<"=" << PESOS[i] << endl;
+	cout << "Puntos y pesos encontrados (" << NG << "):" << endl;
+	for (int i = 0; i < NG; ++i)
+	{
+		cout << "Z" << i << "=" << PUNTOS[i] << ", W" << i << "=" << PESOS[i] << endl;
 	}
-	cout << "--------------------------------" <<endl;
-	cout << "Calculando con los siguientes parámetros:" <<endl;
+	cout << "--------------------------------" << endl;
+	cout << "Calculando con los siguientes parámetros:" << endl;
 	double E = stold(argv[3]);
 	double v = stold(argv[4]);
 	double t = stold(argv[5]);
 	double l = stold(argv[6]);
-	cout<< "E=" << E << ","<< "v="<< v << ","<< "t=" << t << "," << "l=" << l << endl;
-	cout << "--------------------------------" <<endl;
-	cout << "Archivo de enmallado: " << argv[1] <<endl;
-	double C11 = E/(1.0-v*v);
-	double C12 = v*E/(1.0-v*v);
-	double C66 = E/2/(1.0+v);
-	const double PI_calc  = 3.141592653589793238463;
+	cout << "E=" << E << ","
+		 << "v=" << v << ","
+		 << "t=" << t << ","
+		 << "l=" << l << endl;
+	cout << "--------------------------------" << endl;
+	cout << "Archivo de enmallado: " << argv[1] << endl;
+	double C11 = E / (1.0 - v * v);
+	double C12 = v * E / (1.0 - v * v);
+	double C66 = E / 2 / (1.0 + v);
+	const double PI_calc = 3.141592653589793238463;
 
 	vector<Serendipity> ELEMENTOS;
 	cout << "Leyendo archivo" << endl;
-	ELEMENTOS = leerTexto(argv[1],t,PUNTOS,PESOS);
-	cout << "--------------------------------" <<endl;
+	ELEMENTOS = leerTexto(argv[1], t, PUNTOS, PESOS);
+	cout << "--------------------------------" << endl;
 	cout << "Comenzando la integración" << endl;
 	int NUMERO_ELEMENTOS = ELEMENTOS.size();
 	int conti = 0;
 	string rutaParcial = argv[7];
-	string Ruta = "./"+rutaParcial; 
-	int n = Ruta.length(); 
-	char RutaChar[n + 1]; 
+	string Ruta = "./" + rutaParcial;
+	int n = Ruta.length();
+	char RutaChar[n + 1];
 	strcpy(RutaChar, Ruta.c_str());
 	mkdir(RutaChar);
 	double promedio = 0;
-	double tiempo = 0;
-	for (Serendipity e: ELEMENTOS) {
+	auto tiempo = 0;
+	for (Serendipity e : ELEMENTOS)
+	{
 		auto start = high_resolution_clock::now();
 		int contj = 0;
 		conti++;
-		string Ruta = "./"+rutaParcial+"/Elemento"+to_string(conti); 
-		int n = Ruta.length(); 
-		char RutaChar[n + 1]; 
+		string Ruta = "./" + rutaParcial + "/Elemento" + to_string(conti);
+		int n = Ruta.length();
+		char RutaChar[n + 1];
 		strcpy(RutaChar, Ruta.c_str());
 		mkdir(RutaChar);
-		e.matrizLocal(C11,C12,C66,conti,"./"+rutaParcial);
+		e.matrizLocal(C11, C12, C66, conti, "./" + rutaParcial);
 		vector<vector<double>> matricesNoLocales;
-		for (int indiceNoLocal: e.nolocales) {
+		for (int indiceNoLocal : e.nolocales)
+		{
 			contj++;
 			Serendipity enl = ELEMENTOS[indiceNoLocal];
 			int N = e.gdl.size();
 			int NL = enl.gdl.size();
-			MatrixXd KUU(N,NL);
-			MatrixXd KUV(N,NL);
-			MatrixXd KVU(N,NL);
-			MatrixXd KVV(N,NL);
-			for (int gdli = 0; gdli < e.gdl.size(); ++gdli) {
-				for (int gdlj = 0; gdlj < enl.gdl.size(); ++gdlj) {
+			MatrixXd KUU(N, NL);
+			MatrixXd KUV(N, NL);
+			MatrixXd KVU(N, NL);
+			MatrixXd KVV(N, NL);
+			for (int gdli = 0; gdli < e.gdl.size(); ++gdli)
+			{
+				for (int gdlj = 0; gdlj < enl.gdl.size(); ++gdlj)
+				{
 					double KKUU = 0.0;
 					double KKUV = 0.0;
 					double KKVU = 0.0;
 					double KKVV = 0.0;
-					for (int i = 0; i < NG; ++i) {
+					for (int i = 0; i < NG; ++i)
+					{
 						double z = PUNTOS[i];
-						for (int j = 0; j < NG; ++j) {
+						for (int j = 0; j < NG; ++j)
+						{
 							double n = PUNTOS[j];
-							double x = e.TX(z,n);
-							double y = e.TY(z,n);
+							double x = e.TX(z, n);
+							double y = e.TY(z, n);
 							vector<double> jacobianos;
-							jacobianos = e.transfCoordenadas(z,n);
+							jacobianos = e.transfCoordenadas(z, n);
 							double detjac = jacobianos[0];
 							vector<vector<double>> jacobiano_ = e._J;
 
-							double dz_i = e.dzpsi[gdli](z,n);
-							double dn_i = e.dnpsi[gdli](z,n);
+							double dz_i = e.dzpsi[gdli](z, n);
+							double dn_i = e.dnpsi[gdli](z, n);
 
-							double dfdx_i = dz_i * jacobiano_[0][0] + dn_i* jacobiano_[0][1];
-							double dfdy_i = dz_i * jacobiano_[1][0] + dn_i* jacobiano_[1][1];
+							double dfdx_i = dz_i * jacobiano_[0][0] + dn_i * jacobiano_[0][1];
+							double dfdy_i = dz_i * jacobiano_[1][0] + dn_i * jacobiano_[1][1];
 
-							for (int i_nl = 0; i_nl < NG; ++i_nl) {
+							for (int i_nl = 0; i_nl < NG; ++i_nl)
+							{
 								double znl = PUNTOS[i_nl];
-								for (int j_nl = 0; j_nl < NG; ++j_nl) {
+								for (int j_nl = 0; j_nl < NG; ++j_nl)
+								{
 									double nnl = PUNTOS[j_nl];
-									double xnl = enl.TX(znl,nnl);
-									double ynl = enl.TY(znl,nnl);
+									double xnl = enl.TX(znl, nnl);
+									double ynl = enl.TY(znl, nnl);
 									vector<double> jacobianosnl;
 
-									jacobianosnl = enl.transfCoordenadas(znl,nnl);
+									jacobianosnl = enl.transfCoordenadas(znl, nnl);
 									vector<vector<double>> jacobiano_nl = enl._J;
 									double detjacnl = jacobianosnl[0];
 
-									double dznl_j = enl.dzpsi[gdlj](znl,nnl);
-									double dnnl_j = enl.dnpsi[gdlj](znl,nnl);
+									double dznl_j = enl.dzpsi[gdlj](znl, nnl);
+									double dnnl_j = enl.dnpsi[gdlj](znl, nnl);
 
-									double dfdxnl_j = dznl_j * jacobiano_nl[0][0] + dnnl_j* jacobiano_nl[0][1];
-									double dfdynl_j = dznl_j * jacobiano_nl[1][0] + dnnl_j* jacobiano_nl[1][1];
+									double dfdxnl_j = dznl_j * jacobiano_nl[0][0] + dnnl_j * jacobiano_nl[0][1];
+									double dfdynl_j = dznl_j * jacobiano_nl[1][0] + dnnl_j * jacobiano_nl[1][1];
 									double AZN = 0;
-									if (stoi(argv[8])==1) {
-										double L0 = 1.0/2/PI_calc/l/l/t;
-										AZN = atenuacion(x,y,xnl,ynl,L0,l);
-									} else if (stoi(argv[8])==2) {
-										double LR =6*l;
-										double L0 = 3.0/2.0/PI_calc/LR/LR/t;
-										AZN = atenuacion_lineal(x,y,xnl,ynl,L0,LR);
-									} else if (stoi(argv[8])==3) {
-										double LR =6*l;
-										double L0 = 1.0/PI_calc/LR/LR/t;
-										AZN = atenuacion_cuadratica(x,y,xnl,ynl,L0,LR);
-									} else if (stoi(argv[8])==4) {
-										double L0 = 1.0/4.0/PI_calc/l/l/t;
-										AZN = atenuacion_biexponencial_modificada(x,y,xnl,ynl,L0,l);
-									} else {
-										cout<<"ERROR EN ELECCION DE FUNCION DE ATENUACION";
+									if (stoi(argv[8]) == 1)
+									{
+										double L0 = 1.0 / 2 / PI_calc / l / l / t;
+										AZN = atenuacion(x, y, xnl, ynl, L0, l);
+									}
+									else if (stoi(argv[8]) == 2)
+									{
+										double LR = 6 * l;
+										double L0 = 3.0 / 2.0 / PI_calc / LR / LR / t;
+										AZN = atenuacion_lineal(x, y, xnl, ynl, L0, LR);
+									}
+									else if (stoi(argv[8]) == 3)
+									{
+										double LR = 6 * l;
+										double L0 = 1.0 / PI_calc / LR / LR / t;
+										AZN = atenuacion_cuadratica(x, y, xnl, ynl, L0, LR);
+									}
+									else if (stoi(argv[8]) == 4)
+									{
+										double L0 = 1.0 / 4.0 / PI_calc / l / l / t;
+										AZN = atenuacion_biexponencial_modificada(x, y, xnl, ynl, L0, l);
+									}
+									else
+									{
+										double LR = 6 * l;
+										double L0 = 2.0 / PI_calc / LR / LR / t;
+										AZN = atenuacion_4(x, y, xnl, ynl, L0, LR);
+										// cout << "ERROR EN ELECCION DE FUNCION DE ATENUACION";
 									}
 									KKUU += t * t * AZN * (C11 * dfdx_i * dfdxnl_j + C66 * dfdy_i * dfdynl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
 									KKUV += t * t * AZN * (C12 * dfdx_i * dfdynl_j + C66 * dfdy_i * dfdxnl_j) * detjac * detjacnl * PESOS[j_nl] * PESOS[i_nl] * PESOS[j] * PESOS[i];
@@ -285,27 +328,32 @@ int main (int argc, char const *argv[]) {
 							}
 						}
 					}
-					KUU(gdli,gdlj)=KKUU;
-					KUV(gdli,gdlj)=KKUV;
-					KVU(gdli,gdlj)=KKVU;
-					KVV(gdli,gdlj)=KKVV;
+					KUU(gdli, gdlj) = KKUU;
+					KUV(gdli, gdlj) = KKUV;
+					KVU(gdli, gdlj) = KKVU;
+					KVV(gdli, gdlj) = KKVV;
 				}
 			}
-			MatrixXd K(2*N, 2*NL);
-			K<<KUU,KUV,KVU,KVV;
+			MatrixXd K(2 * N, 2 * NL);
+			K << KUU, KUV, KVU, KVV;
 			Map<const VectorXd> v1(K.data(), K.size());
 			vector<double> v2;
 			v2.resize(v1.size());
 			VectorXd::Map(&v2[0], v1.size()) = v1;
 			matricesNoLocales.push_back(v2);
 		}
-		ofstream myfile("./"+rutaParcial+"/Elemento"+to_string(conti)+"/KNLS.csv");
+		ofstream myfile("./" + rutaParcial + "/Elemento" + to_string(conti) + "/KNLS.csv");
 		myfile << defaultfloat << setprecision(numeric_limits<double>::digits10);
-		for (int i = 0; i < matricesNoLocales.size(); ++i) {
-			for (int j = 0; j < matricesNoLocales[i].size(); ++j) {
-				if (j == matricesNoLocales[i].size()-1) {
+		for (int i = 0; i < matricesNoLocales.size(); ++i)
+		{
+			for (int j = 0; j < matricesNoLocales[i].size(); ++j)
+			{
+				if (j == matricesNoLocales[i].size() - 1)
+				{
 					myfile << matricesNoLocales[i][j];
-				} else {
+				}
+				else
+				{
 					myfile << matricesNoLocales[i][j] << ",";
 				}
 			}
@@ -313,9 +361,11 @@ int main (int argc, char const *argv[]) {
 		}
 		auto stop = high_resolution_clock::now();
 		auto duration = duration_cast<milliseconds>(stop - start);
-		promedio =  (promedio*(conti-1)+duration.count())/conti;
-		double porcentaje = 100.0*conti/NUMERO_ELEMENTOS;
-		cout<<"Local: "<<conti<<" - Tiempo: "<< duration.count()<<"ms - "<< porcentaje << "%"<< " - ETA: " << ceil(promedio*NUMERO_ELEMENTOS-promedio*conti)/1000/60 << " minutos"<<endl;
+		tiempo = tiempo + duration.count();
+		promedio = (promedio * (conti - 1) + duration.count()) / conti;
+		double porcentaje = 100.0 * conti / NUMERO_ELEMENTOS;
+		cout << "Local: " << conti << " - Tiempo: " << duration.count() << "ms - " << porcentaje << "%"
+			 << " - ETA: " << ceil(promedio * NUMERO_ELEMENTOS - promedio * conti) / 1000 / 60 << " minutos t " << tiempo / 1000 / 60.0 << " m" << endl;
 	}
 	return 0;
 }
